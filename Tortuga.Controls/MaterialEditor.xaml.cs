@@ -52,6 +52,11 @@ namespace Tortuga.Controls
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
+            MaterialSelector = new ListView();
+            materialSelection.Children.Add(MaterialSelector);
+            MaterialSelector.Background = Brushes.WhiteSmoke;
+            MaterialSelector.BorderBrush = Brushes.WhiteSmoke;
+
 
             if (System.IO.File.Exists(this.alternativeDataSourcePath))
             {
@@ -84,10 +89,7 @@ namespace Tortuga.Controls
             }
 
 
-            MaterialSelector = new ListView();
-            materialSelection.Children.Add(MaterialSelector);
-            MaterialSelector.Background = Brushes.WhiteSmoke;
-            MaterialSelector.BorderBrush = Brushes.WhiteSmoke;
+
 
 
             Tortuga.Types.Material material1 = new Material()
