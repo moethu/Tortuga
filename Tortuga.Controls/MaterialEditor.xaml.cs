@@ -72,7 +72,8 @@ namespace Tortuga.Controls
                             DepletionOfNonrenewbles = new UnitDouble<Types.LCA.MJ>(double.Parse(fields[3])),
                             DepletionOfOzoneLayer = new UnitDouble<Types.LCA.kgCFC11>(double.Parse(fields[4])),
                             Eutrophication = new UnitDouble<Types.LCA.kgPhostphate>(double.Parse(fields[5])),
-                            FormationTroposphericOzone = new UnitDouble<Types.LCA.kgNOx>(double.Parse(fields[6]))
+                            FormationTroposphericOzone = new UnitDouble<Types.LCA.kgNOx>(double.Parse(fields[6])),
+
                         };
 
                         MaterialSelector.Items.Add(material.Draw());
@@ -126,7 +127,8 @@ namespace Tortuga.Controls
             infoScreen.Margin = new Thickness(5);
             materialAssemblyHost.Children.Add(infoScreen);
 
-            assembly = new Assembly();
+            if (this.assembly == null) this.assembly = new Assembly();
+            else this.assembly.Draw(this.materialComposer);
 
 
         }
@@ -148,6 +150,7 @@ namespace Tortuga.Controls
             return lvi;
         
         }
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {

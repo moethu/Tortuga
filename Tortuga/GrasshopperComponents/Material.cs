@@ -60,16 +60,21 @@ namespace Tortuga.GrasshopperComponents
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            string serializedData = "";
+            this.GetValue("assembly", serializedData);
+            if (serializedData != "")
+            {
+                this.assembly = (Types.Assembly)Serialization.Utilities.Deserialize(serializedData, typeof(Types.Assembly));
+            }
+
+
             GH_String path = new GH_String("");
-
             DA.GetData<GH_String>("Path", ref path);
-
             this.alternativeDataSourcePath = path.Value;
 
-            
 
 
-            
+            if (assembly != null) this.SetValue("assembly", Serialization.Utilities.Serialize(this.assembly));
 
             DA.SetData("Material", assembly);
         }
@@ -82,6 +87,7 @@ namespace Tortuga.GrasshopperComponents
             Grasshopper.GUI.GH_WindowsFormUtil.CenterFormOnCursor(materialEditor, true);
 
             materialEditor.materialEditor1.alternativeDataSourcePath = this.alternativeDataSourcePath;
+            if (this.assembly != null) materialEditor.materialEditor1.assembly = this.assembly;
 
             materialEditor.ShowDialog();
 

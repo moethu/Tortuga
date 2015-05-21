@@ -24,6 +24,8 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows;
+using System.ServiceModel;
+using System.Runtime.Serialization;
 
 namespace Tortuga.Types
 {
@@ -45,16 +47,28 @@ namespace Tortuga.Types
 
     public class Material
     {
+        [DataMember]
         public string Name;
+
+        [DataMember]
         public Guid GUID;
 
-
-
+        [DataMember]
         public UnitDouble<LCA.CO2e> GlobalWarmingPotential;
+
+        [DataMember]
         public UnitDouble<LCA.kgCFC11> DepletionOfOzoneLayer;
+
+        [DataMember]
         public UnitDouble<LCA.kgSO2> Acidification;
+
+        [DataMember]
         public UnitDouble<LCA.kgPhostphate> Eutrophication;
+
+        [DataMember]
         public UnitDouble<LCA.kgNOx> FormationTroposphericOzone;
+
+        [DataMember]
         public UnitDouble<LCA.MJ> DepletionOfNonrenewbles;
 
         public Material() 
@@ -103,10 +117,27 @@ namespace Tortuga.Types
         }
     }
 
+    [DataContract]
+    [XmlSerializerFormat]
+    [KnownType(typeof(Layer))]
+    [KnownType(typeof(Material))]
+    [KnownType(typeof(UnitDouble<LCA.CO2e>))]
+    [KnownType(typeof(LCA.CO2e))]
+    [KnownType(typeof(UnitDouble<LCA.kgCFC11>))]
+    [KnownType(typeof(LCA.kgCFC11))]
+    [KnownType(typeof(UnitDouble<LCA.kgSO2>))]
+    [KnownType(typeof(LCA.kgSO2))]
+    [KnownType(typeof(UnitDouble<LCA.kgPhostphate>))]
+    [KnownType(typeof(LCA.kgPhostphate))]
+    [KnownType(typeof(UnitDouble<LCA.kgNOx>))]
+    [KnownType(typeof(LCA.kgNOx))]
+    [KnownType(typeof(UnitDouble<LCA.MJ>))]
+    [KnownType(typeof(LCA.MJ))]
+    [KnownType(typeof(LCA))]
     public class Assembly
     {
+        [DataMember]
         public List<Layer> Layers;
-        public string Name;
 
         public override string ToString()
         {
@@ -126,7 +157,6 @@ namespace Tortuga.Types
                 return overall;
             }
         }
-
 
         public UnitDouble<LCA.kgCFC11> DepletionOfOzoneLayer
         {
@@ -188,27 +218,31 @@ namespace Tortuga.Types
             }
         }
 
-
-
-
         public void AddLayer(ListView assemblyList, Layer layer)
         {
             this.Layers.Add(layer);
             assemblyList.Items.Add(layer.Draw());
         }
 
+        public void Draw(ListView assemblyList)
+        {
+            foreach (Layer layer in this.Layers)
+            assemblyList.Items.Add(layer.Draw());
+        }
 
-
-        public Guid ID;
     }
 
+    [DataContract]
+    [XmlSerializerFormat]
     public class Layer
     {
+        [DataMember]
         public Material Material;
-        public double Width;
-        public Color Color;
 
-        public Layer(Material material) { this.Width = 20; this.Color = Colors.White; this.Material = material; }
+        [DataMember]
+        public double Width;
+
+        public Layer(Material material) { this.Width = 20; this.Material = material; }
 
         private static double heightMax = 200;
         private static double heightMin = 20;
@@ -231,7 +265,7 @@ namespace Tortuga.Types
                 Height = this.Width
             };
 
-            layerItem.Background = new SolidColorBrush(this.Color);
+            layerItem.Background = new SolidColorBrush(Colors.White);
             layerItem.BorderBrush = Brushes.White;
             layerItem.BorderThickness = new Thickness(1);
 

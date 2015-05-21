@@ -21,12 +21,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ServiceModel;
+using System.Runtime.Serialization;
 
 namespace Tortuga.Types
 {
 
+
     public interface IUnit { }
 
+    [DataContract]
+    [XmlSerializerFormat]
     public static class LCA
     {
         public interface ILCA : IUnit { }
@@ -39,9 +44,13 @@ namespace Tortuga.Types
         public class MJ : ILCA { }
     }
 
+    [DataContract]
+    [XmlSerializerFormat]
     public class UnitDouble<T> where T : IUnit
     {
+        [DataMember]
         public readonly double Value;
+
         public UnitDouble(double value)
         {
             Value = value;
