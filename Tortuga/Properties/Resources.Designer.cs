@@ -63,9 +63,9 @@ namespace Tortuga.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap report_go {
+        internal static System.Drawing.Bitmap tortuga_calc {
             get {
-                object obj = ResourceManager.GetObject("report_go", resourceCulture);
+                object obj = ResourceManager.GetObject("tortuga_calc", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace Tortuga.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap report_green {
+        internal static System.Drawing.Bitmap tortuga_edit {
             get {
-                object obj = ResourceManager.GetObject("report_green", resourceCulture);
+                object obj = ResourceManager.GetObject("tortuga_edit", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace Tortuga.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap report_stack {
+        internal static System.Drawing.Bitmap tortuga_result {
             get {
-                object obj = ResourceManager.GetObject("report_stack", resourceCulture);
+                object obj = ResourceManager.GetObject("tortuga_result", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

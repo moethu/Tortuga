@@ -88,15 +88,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\report_green.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\report_stack.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\report_go.png" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Tortuga.Controls\Tortuga.Controls.csproj">
       <Project>{7dedcd0f-bdce-464a-a6f1-4ebbf9b2e304}</Project>
       <Name>Tortuga.Controls</Name>
@@ -105,6 +96,15 @@
       <Project>{54e117e7-055b-41f7-b46d-124188cc0193}</Project>
       <Name>Tortuga.Types</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tortuga-calc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tortuga-edit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tortuga-result.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

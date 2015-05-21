@@ -108,7 +108,7 @@ namespace Tortuga.GrasshopperComponents
         {
             get
             {
-                return Properties.Resources.report_stack;
+                return Properties.Resources.tortuga_edit;
             }
         }
         public override GH_Exposure Exposure
