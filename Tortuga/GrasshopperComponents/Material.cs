@@ -60,8 +60,8 @@ namespace Tortuga.GrasshopperComponents
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string serializedData = "";
-            this.GetValue("assembly", serializedData);
+            string serializedData = this.GetValue("assembly", "");
+            
             if (serializedData != "")
             {
                 this.assembly = (Types.Assembly)Serialization.Utilities.Deserialize(serializedData, typeof(Types.Assembly));

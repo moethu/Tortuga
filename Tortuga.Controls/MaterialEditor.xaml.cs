@@ -57,9 +57,10 @@ namespace Tortuga.Controls
             {
                 string[] data = System.IO.File.ReadAllLines(this.alternativeDataSourcePath);
 
-                foreach (string row in data)
+
+                for(int i = 1; i < data.Length; i++)
                 {
-                    string[] fields = row.Split(';');
+                    string[] fields = data[i].Split(',');
 
                     if (fields.Length == 7)
                     {
@@ -73,7 +74,6 @@ namespace Tortuga.Controls
                             DepletionOfOzoneLayer = new UnitDouble<Types.LCA.kgCFC11>(double.Parse(fields[4])),
                             Eutrophication = new UnitDouble<Types.LCA.kgPhostphate>(double.Parse(fields[5])),
                             FormationTroposphericOzone = new UnitDouble<Types.LCA.kgNOx>(double.Parse(fields[6])),
-
                         };
 
                         MaterialSelector.Items.Add(material.Draw());
