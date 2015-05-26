@@ -230,6 +230,28 @@ namespace Tortuga.Types
             assemblyList.Items.Add(layer.Draw());
         }
 
+        public Assembly Multiply(double factor)
+        {
+            Assembly assembly = new Assembly();
+
+            foreach (Layer layer in this.Layers)
+            {
+                assembly.Layers.Add(new Layer(layer.Material, layer.Width * factor));
+            }
+
+            return assembly;
+        }
+
+        public static Assembly operator +(Assembly first, Assembly second)
+        {
+            Assembly assembly = new Assembly();
+
+            foreach (Layer layer in first.Layers) assembly.Layers.Add(layer);
+            foreach (Layer layer in second.Layers) assembly.Layers.Add(layer);
+
+            return assembly;
+        }
+
     }
 
     [DataContract]
@@ -243,6 +265,8 @@ namespace Tortuga.Types
         public double Width;
 
         public Layer(Material material) { this.Width = 20; this.Material = material; }
+
+        public Layer(Material material, double width) { this.Width = width; this.Material = material; }
 
         private static double heightMax = 200;
         private static double heightMin = 20;

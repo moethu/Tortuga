@@ -115,4 +115,111 @@ namespace Tortuga.GrasshopperComponents
 
     }
 
+    public class Add : GH_Component
+    {
+        public Add() : base("Tortuga Material Addition", "Addition", "Add Tortuga Materials", "Tortuga", "Operators") { }
+
+        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Material A", "A", "Tortuga Material", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Material B", "B", "Tortuga Material", GH_ParamAccess.item);
+        }
+
+        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Result", "R", "Tortuga Material", GH_ParamAccess.item);
+        }
+
+        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            Types.Assembly assemblyA = new Types.Assembly();
+            DA.GetData<Types.Assembly>("Material A", ref assemblyA);
+
+            Types.Assembly assemblyB = new Types.Assembly();
+            DA.GetData<Types.Assembly>("Material B", ref assemblyB);
+
+            DA.SetData("Result", assemblyA + assemblyB);
+        }
+
+
+        // Properties
+        public override Guid ComponentGuid
+        {
+            get
+            {
+                return new Guid("{5ea4aa3d-d171-3a9f-a712-4322afeb3b1a}");
+            }
+        }
+        protected override System.Drawing.Bitmap Internal_Icon_24x24
+        {
+            get
+            {
+                return Properties.Resources.tortuga_add;
+            }
+        }
+        public override GH_Exposure Exposure
+        {
+            get
+            {
+                return GH_Exposure.secondary;
+            }
+        }
+
+
+    }
+
+    public class Multiply : GH_Component
+    {
+        public Multiply() : base("Tortuga Material Multiplication", "Multiplication", "Multiply Tortuga Materials", "Tortuga", "Operators") { }
+
+        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Material", "M", "Tortuga Material", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Factor", "F", "Factor", GH_ParamAccess.item);
+        }
+
+        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Result", "R", "Tortuga Material", GH_ParamAccess.item);
+        }
+
+        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            Types.Assembly assembly = new Types.Assembly();
+            DA.GetData<Types.Assembly>("Material", ref assembly);
+
+            GH_Number factor = new GH_Number(0);
+            DA.GetData<GH_Number>("Factor", ref factor);
+
+            Types.Assembly newAssembly = assembly.Multiply(factor.Value);
+
+            DA.SetData("Result", newAssembly);
+        }
+
+
+        // Properties
+        public override Guid ComponentGuid
+        {
+            get
+            {
+                return new Guid("{5ea4aa3d-d171-3a9f-a712-4323bfeb1b5a}");
+            }
+        }
+        protected override System.Drawing.Bitmap Internal_Icon_24x24
+        {
+            get
+            {
+                return Properties.Resources.tortuga_multi;
+            }
+        }
+        public override GH_Exposure Exposure
+        {
+            get
+            {
+                return GH_Exposure.secondary;
+            }
+        }
+
+
+    }
 }
