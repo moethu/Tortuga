@@ -37,7 +37,7 @@ namespace Tortuga.GrasshopperComponents
 
     public class MaterialEditor : GH_Component
     {
-        public MaterialEditor() : base("Tortuga Material Editor", "Material Editor", "LCA Material Editor", "Tortuga", "Tortuga") { }
+        public MaterialEditor() : base("Tortuga Material Editor", "Material Editor", "LCA Material Editor", "Tortuga", "Material") { }
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
@@ -135,5 +135,112 @@ namespace Tortuga.GrasshopperComponents
             return Grasshopper.GUI.Canvas.GH_ObjectResponse.Handled;
         }
     }
+
+    public class Layer : GH_Component
+    {
+        public Layer() : base("Tortuga Material Layer", "Material Layer", "LCA Material Layer", "Tortuga", "Material") { }
+
+        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Material", "M", "Tortuga Material", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Thickness", "T", "Thickness in m", GH_ParamAccess.item);
+        }
+
+        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Layer", "L", "Tortuga Material Layer", GH_ParamAccess.item);
+        }
+
+        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            GH_Number thickness = new GH_Number(0);
+            DA.GetData<GH_Number>("Thickness", ref thickness);
+
+            Types.Material material = new Types.Material();
+            DA.GetData<Types.Material>("Material", ref material);
+
+            Types.Layer layer = new Types.Layer(material,thickness.Value);
+
+            DA.SetData("Layer", layer);
+        }
+
+        // Properties
+        public override Guid ComponentGuid
+        {
+            get
+            {
+                return new Guid("{5ea4aa2d-d252-3a9f-a777-4323bfeb3b1a}");
+            }
+        }
+        protected override System.Drawing.Bitmap Internal_Icon_24x24
+        {
+            get
+            {
+                return Properties.Resources.tortuga_edit;
+            }
+        }
+        public override GH_Exposure Exposure
+        {
+            get
+            {
+                return GH_Exposure.secondary;
+            }
+        }
+
+
+    }
+
+    public class Assembly : GH_Component
+    {
+        public Assembly() : base("Tortuga Material Assembly", "Material Assembly", "LCA Material Assembly", "Tortuga", "Material") { }
+
+        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Layer", "L", "Tortuga Material Layer", GH_ParamAccess.list);
+        }
+
+        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Assembly", "A", "Tortuga Material Assembly", GH_ParamAccess.item);
+        }
+
+        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            List<Types.Layer> layers = new List<Types.Layer>();
+            DA.GetDataList<Types.Layer>("Layer", layers);
+
+            Types.Assembly assembly = new Types.Assembly();
+            foreach (Types.Layer layer in layers) assembly.Layers.Add(layer);
+
+            DA.SetData("Assembly", assembly);
+        }
+
+        // Properties
+        public override Guid ComponentGuid
+        {
+            get
+            {
+                return new Guid("{5ea4aa2d-d252-3a9f-a717-4123bfeb3b1a}");
+            }
+        }
+        protected override System.Drawing.Bitmap Internal_Icon_24x24
+        {
+            get
+            {
+                return Properties.Resources.tortuga_edit;
+            }
+        }
+        public override GH_Exposure Exposure
+        {
+            get
+            {
+                return GH_Exposure.secondary;
+            }
+        }
+
+
+    }
+
+
 
 }
