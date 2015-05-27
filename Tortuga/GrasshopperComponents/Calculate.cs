@@ -191,9 +191,7 @@ namespace Tortuga.GrasshopperComponents
             GH_Number factor = new GH_Number(0);
             DA.GetData<GH_Number>("Factor", ref factor);
 
-            Types.Assembly newAssembly = assembly.Multiply(factor.Value);
-
-            DA.SetData("Result", newAssembly);
+            DA.SetData("Result", assembly * factor.Value);
         }
 
 

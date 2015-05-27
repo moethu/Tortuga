@@ -137,7 +137,7 @@ namespace Tortuga.Controls
 
         void materialComposer_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            infoScreen.Text = String.Format("Width: {0} mm, {1} CO2e/m3 = {2} CO2e/m2", new object[] { assembly.Width, assembly.GlobalWarmingPotential.Value, assembly.GlobalWarmingPotential.Value * assembly.Width });
+            infoScreen.Text = String.Format("Width: {0} m, {1} CO2e/m3 = {2} CO2e/m2", new object[] { assembly.Width, assembly.GlobalWarmingPotential.Value, assembly.GlobalWarmingPotential.Value * assembly.Width });
         }
 
         private ListViewItem AddListViewItem(string name)
@@ -167,6 +167,17 @@ namespace Tortuga.Controls
             
 
             
+        }
+
+        private void Remove_Click(object sender, RoutedEventArgs e)
+        {
+            if (MaterialSelector.SelectedItem != null)
+            {
+                ListViewItem lvi = (ListViewItem)MaterialSelector.SelectedItem;
+                Layer mat = (Layer)lvi.Tag;
+                assembly.Layers.Remove(mat);
+                materialComposer.Items.RemoveAt(MaterialSelector.SelectedIndex);
+            }
         }
 
 

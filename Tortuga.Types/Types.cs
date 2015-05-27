@@ -163,7 +163,7 @@ namespace Tortuga.Types
             get
             {
                 UnitDouble<LCA.kgCFC11> overall = new UnitDouble<LCA.kgCFC11>(0);
-                foreach (Layer layer in this.Layers) overall += layer.Material.DepletionOfOzoneLayer;
+                foreach (Layer layer in this.Layers) overall += layer.DepletionOfOzoneLayer;
                 return overall;
             }
         }
@@ -173,7 +173,7 @@ namespace Tortuga.Types
             get
             {
                 UnitDouble<LCA.kgSO2> overall = new UnitDouble<LCA.kgSO2>(0);
-                foreach (Layer layer in this.Layers) overall += layer.Material.Acidification;
+                foreach (Layer layer in this.Layers) overall += layer.Acidification;
                 return overall;
             }
         }
@@ -183,7 +183,7 @@ namespace Tortuga.Types
             get
             {
                 UnitDouble<LCA.kgPhostphate> overall = new UnitDouble<LCA.kgPhostphate>(0);
-                foreach (Layer layer in this.Layers) overall += layer.Material.Eutrophication;
+                foreach (Layer layer in this.Layers) overall += layer.Eutrophication;
                 return overall;
             }
         }
@@ -193,7 +193,7 @@ namespace Tortuga.Types
             get
             {
                 UnitDouble<LCA.kgNOx> overall = new UnitDouble<LCA.kgNOx>(0);
-                foreach (Layer layer in this.Layers) overall += layer.Material.FormationTroposphericOzone;
+                foreach (Layer layer in this.Layers) overall += layer.FormationTroposphericOzone;
                 return overall;
             }
         }
@@ -203,7 +203,7 @@ namespace Tortuga.Types
             get
             {
                 UnitDouble<LCA.MJ> overall = new UnitDouble<LCA.MJ>(0);
-                foreach (Layer layer in this.Layers) overall += layer.Material.DepletionOfNonrenewbles;
+                foreach (Layer layer in this.Layers) overall += layer.DepletionOfNonrenewbles;
                 return overall;
             }
         }
@@ -213,7 +213,7 @@ namespace Tortuga.Types
             get
             {
                 UnitDouble<LCA.CO2e> overall = new UnitDouble<LCA.CO2e>(0);
-                foreach (Layer layer in this.Layers) overall += layer.Material.GlobalWarmingPotential;
+                foreach (Layer layer in this.Layers) overall += layer.GlobalWarmingPotential;
                 return overall;
             }
         }
@@ -230,17 +230,6 @@ namespace Tortuga.Types
             assemblyList.Items.Add(layer.Draw());
         }
 
-        public Assembly Multiply(double factor)
-        {
-            Assembly assembly = new Assembly();
-
-            foreach (Layer layer in this.Layers)
-            {
-                assembly.Layers.Add(new Layer(layer.Material, layer.Width * factor));
-            }
-
-            return assembly;
-        }
 
         public static Assembly operator +(Assembly first, Assembly second)
         {
@@ -248,6 +237,20 @@ namespace Tortuga.Types
 
             foreach (Layer layer in first.Layers) assembly.Layers.Add(layer);
             foreach (Layer layer in second.Layers) assembly.Layers.Add(layer);
+
+            return assembly;
+        }
+
+        public static Assembly operator *(Assembly first, double factor)
+        {
+            Assembly assembly = new Assembly();
+
+            foreach (Layer layer in first.Layers)
+            {
+                Layer lay = new Layer(layer.Material, layer.Width * factor);                
+                assembly.Layers.Add(lay);
+            }
+       
 
             return assembly;
         }
@@ -264,12 +267,12 @@ namespace Tortuga.Types
         [DataMember]
         public double Width;
 
-        public Layer(Material material) { this.Width = 20; this.Material = material; }
+        public Layer(Material material) { this.Width = 0.02; this.Material = material; }
 
         public Layer(Material material, double width) { this.Width = width; this.Material = material; }
 
-        private static double heightMax = 200;
-        private static double heightMin = 20;
+        private static double heightMax = 0.2;
+        private static double heightMin = 0.02;
 
         public ListViewItem Draw()
         {
@@ -286,7 +289,7 @@ namespace Tortuga.Types
             StackPanel panel = new StackPanel()
             {
                 Orientation = Orientation.Horizontal,
-                Height = this.Width
+                Height = this.Width * 1000
             };
 
             layerItem.Background = new SolidColorBrush(Colors.White);
@@ -305,7 +308,7 @@ namespace Tortuga.Types
 
             TextBlock unitLabel = new TextBlock()
             {
-                Text = "mm",
+                Text = "m",
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Margin = new Thickness(5)
             };
@@ -328,6 +331,53 @@ namespace Tortuga.Types
 
         }
 
+        public UnitDouble<LCA.kgCFC11> DepletionOfOzoneLayer
+        {
+            get
+            {
+                return new UnitDouble<LCA.kgCFC11>(this.Material.DepletionOfOzoneLayer.Value * this.Width);
+            }
+        }
+
+        public UnitDouble<LCA.kgSO2> Acidification
+        {
+            get
+            {
+                return new UnitDouble<LCA.kgSO2>(this.Material.Acidification.Value * this.Width);
+            }
+        }
+
+        public UnitDouble<LCA.kgPhostphate> Eutrophication
+        {
+            get
+            {
+                return new UnitDouble<LCA.kgPhostphate>(this.Material.Eutrophication.Value * this.Width);
+            }
+        }
+
+        public UnitDouble<LCA.kgNOx> FormationTroposphericOzone
+        {
+            get
+            {
+                return new UnitDouble<LCA.kgNOx>(this.Material.FormationTroposphericOzone.Value * this.Width);
+            }
+        }
+
+        public UnitDouble<LCA.MJ> DepletionOfNonrenewbles
+        {
+            get
+            {
+                return new UnitDouble<LCA.MJ>(this.Material.DepletionOfNonrenewbles.Value * this.Width);
+            }
+        }
+
+        public UnitDouble<LCA.CO2e> GlobalWarmingPotential
+        {
+            get
+            {
+                return new UnitDouble<LCA.CO2e>(this.Material.GlobalWarmingPotential.Value * this.Width);
+            }
+        }
 
         public static ContextMenu contextMenu;
 
@@ -338,13 +388,15 @@ namespace Tortuga.Types
             MenuItem moveDown = new MenuItem() { Header = "move down" }; moveDown.Click += move_Click;
             MenuItem moveTop = new MenuItem() { Header = "move top" }; moveTop.Click += move_Click;
             MenuItem moveBottom = new MenuItem() { Header = "move bottom" }; moveBottom.Click += move_Click;
+
             contextMenu.Items.Add(moveUp);
             contextMenu.Items.Add(moveDown);
             contextMenu.Items.Add(moveTop);
             contextMenu.Items.Add(moveBottom);
-
         
         }
+
+
 
         static void move_Click(object sender, RoutedEventArgs e)
         {
@@ -406,7 +458,7 @@ namespace Tortuga.Types
                 else if (value > Layer.heightMax) value = Layer.heightMax;
 
                 StackPanel panel = (StackPanel)textBox.Parent;
-                panel.Height = value;
+                panel.Height = value * 1000;
 
 
             }
