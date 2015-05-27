@@ -171,12 +171,12 @@ namespace Tortuga.Controls
 
         private void Remove_Click(object sender, RoutedEventArgs e)
         {
-            if (MaterialSelector.SelectedItem != null)
+            if (materialComposer.SelectedItem != null)
             {
-                ListViewItem lvi = (ListViewItem)MaterialSelector.SelectedItem;
+                ListViewItem lvi = (ListViewItem)materialComposer.SelectedItem;
                 Layer mat = (Layer)lvi.Tag;
                 assembly.Layers.Remove(mat);
-                materialComposer.Items.RemoveAt(MaterialSelector.SelectedIndex);
+                materialComposer.Items.RemoveAt(materialComposer.SelectedIndex);
             }
         }
 

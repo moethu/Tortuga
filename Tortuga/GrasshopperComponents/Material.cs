@@ -74,7 +74,7 @@ namespace Tortuga.GrasshopperComponents
 
 
 
-            if (assembly != null) this.SetValue("assembly", Serialization.Utilities.Serialize(this.assembly));
+            //if (assembly != null) this.SetValue("assembly", Serialization.Utilities.Serialize(this.assembly));
 
             DA.SetData("Material", assembly);
         }
@@ -91,7 +91,10 @@ namespace Tortuga.GrasshopperComponents
 
             materialEditor.ShowDialog();
 
-            this.assembly = materialEditor.materialEditor1.assembly;
+           // this.assembly = materialEditor.materialEditor1.assembly;
+
+            this.SetValue("assembly", Serialization.Utilities.Serialize(materialEditor.materialEditor1.assembly));
+
             this.ExpireSolution(true);
             
         }

@@ -286,10 +286,14 @@ namespace Tortuga.Types
             
             layerItem.Tag = this;
 
+            double width = this.Width;
+            if (width < Layer.heightMin) width = Layer.heightMin;
+            else if (width > Layer.heightMax) width = Layer.heightMax;
+
             StackPanel panel = new StackPanel()
             {
                 Orientation = Orientation.Horizontal,
-                Height = this.Width * 1000
+                Height = width * 1000
             };
 
             layerItem.Background = new SolidColorBrush(Colors.White);
