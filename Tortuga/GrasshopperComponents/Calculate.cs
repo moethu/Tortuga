@@ -35,9 +35,9 @@ using System.Threading;
 namespace Tortuga.GrasshopperComponents
 {
 
-    public class Calculate : GH_Component
+    public class CalculateSurface : GH_Component
     {
-        public Calculate() : base("Tortuga Calculator", "Calculator", "Calculate LCA Values", "Tortuga", "Tortuga") { }
+        public CalculateSurface() : base("Tortuga Surface Calculator", "Calculator", "Calculate LCA Values", "Tortuga", "Calculate") { }
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
@@ -60,8 +60,6 @@ namespace Tortuga.GrasshopperComponents
         {
             Types.Assembly assembly = new Types.Assembly();
             DA.GetData<Types.Assembly>("Material", ref assembly);
-
-
 
             GH_Number area = new GH_Number(0);
             GH_Surface surface = new GH_Surface();
@@ -115,72 +113,25 @@ namespace Tortuga.GrasshopperComponents
 
     }
 
-    public class Add : GH_Component
+    public class CalculateVolume : GH_Component
     {
-        public Add() : base("Tortuga Material Addition", "Addition", "Add Tortuga Materials", "Tortuga", "Operators") { }
-
-        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Material A", "A", "Tortuga Material", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Material B", "B", "Tortuga Material", GH_ParamAccess.item);
-        }
-
-        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Result", "R", "Tortuga Material", GH_ParamAccess.item);
-        }
-
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
-            Types.Assembly assemblyA = new Types.Assembly();
-            DA.GetData<Types.Assembly>("Material A", ref assemblyA);
-
-            Types.Assembly assemblyB = new Types.Assembly();
-            DA.GetData<Types.Assembly>("Material B", ref assemblyB);
-
-            DA.SetData("Result", assemblyA + assemblyB);
-        }
-
-
-        // Properties
-        public override Guid ComponentGuid
-        {
-            get
-            {
-                return new Guid("{5ea4aa3d-d171-3a9f-a712-4322afeb3b1a}");
-            }
-        }
-        protected override System.Drawing.Bitmap Internal_Icon_24x24
-        {
-            get
-            {
-                return Properties.Resources.tortuga_add;
-            }
-        }
-        public override GH_Exposure Exposure
-        {
-            get
-            {
-                return GH_Exposure.secondary;
-            }
-        }
-
-
-    }
-
-    public class Multiply : GH_Component
-    {
-        public Multiply() : base("Tortuga Material Multiplication", "Multiplication", "Multiply Tortuga Materials", "Tortuga", "Operators") { }
+        public CalculateVolume() : base("Tortuga Volume Calculator", "Calculator", "Calculate LCA Values", "Tortuga", "Calculate") { }
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Material", "M", "Tortuga Material", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Factor", "F", "Factor", GH_ParamAccess.item);
+
+            List<int> optinalParameters = new List<int>();
+
+            optinalParameters.Add(pManager.AddNumberParameter("Volume", "V", "Optional: Volume to calculate", GH_ParamAccess.item));
+            optinalParameters.Add(pManager.AddBrepParameter("Brep", "B", "Optional: Brep to calculate", GH_ParamAccess.item));
+
+            foreach (int optional in optinalParameters) pManager[optional].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Result", "R", "Tortuga Material", GH_ParamAccess.item);
+            pManager.AddGenericParameter("LCA Result", "L", "Calculated LCA Result", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -188,10 +139,29 @@ namespace Tortuga.GrasshopperComponents
             Types.Assembly assembly = new Types.Assembly();
             DA.GetData<Types.Assembly>("Material", ref assembly);
 
-            GH_Number factor = new GH_Number(0);
-            DA.GetData<GH_Number>("Factor", ref factor);
+            GH_Brep brep = new GH_Brep();
+            GH_Number volume = new GH_Number(0);
 
-            DA.SetData("Result", assembly * factor.Value);
+            if (!DA.GetData<GH_Number>("Volume", ref volume)) volume = new GH_Number(0);
+            if (!DA.GetData<GH_Brep>("Brep", ref brep)) brep = new GH_Brep();
+
+            double calculationVolume = volume.Value;
+            if (brep.Value != null) calculationVolume += brep.Value.GetVolume();
+
+
+            Types.Result result = new Types.Result()
+            {
+                GlobalWarmingPotential = new Types.UnitDouble<Types.LCA.CO2e>(assembly.GlobalWarmingPotential.Value * calculationVolume),
+                Acidification = new Types.UnitDouble<Types.LCA.kgSO2>(assembly.Acidification.Value * calculationVolume),
+                DepletionOfNonrenewbles = new Types.UnitDouble<Types.LCA.MJ>(assembly.DepletionOfNonrenewbles.Value * calculationVolume),
+                DepletionOfOzoneLayer = new Types.UnitDouble<Types.LCA.kgCFC11>(assembly.DepletionOfOzoneLayer.Value * calculationVolume),
+                Eutrophication = new Types.UnitDouble<Types.LCA.kgPhostphate>(assembly.Eutrophication.Value * calculationVolume),
+                FormationTroposphericOzone = new Types.UnitDouble<Types.LCA.kgNOx>(assembly.FormationTroposphericOzone.Value * calculationVolume)
+            };
+
+
+
+            DA.SetData("LCA Result", result);
         }
 
 
@@ -200,14 +170,14 @@ namespace Tortuga.GrasshopperComponents
         {
             get
             {
-                return new Guid("{5ea4aa3d-d171-3a9f-a712-4323bfeb1b5a}");
+                return new Guid("{5ea4aa3d-d171-3a9f-a712-4323bfeb3b2b}");
             }
         }
         protected override System.Drawing.Bitmap Internal_Icon_24x24
         {
             get
             {
-                return Properties.Resources.tortuga_multi;
+                return Properties.Resources.tortuga_calc;
             }
         }
         public override GH_Exposure Exposure
@@ -220,4 +190,6 @@ namespace Tortuga.GrasshopperComponents
 
 
     }
+
+
 }

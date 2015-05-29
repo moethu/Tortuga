@@ -41,8 +41,12 @@ namespace Tortuga.GrasshopperComponents
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            int a = pManager.AddTextParameter("Path", "P", "Optional: Filepath if you want to load your own CSV data", GH_ParamAccess.item);
-            pManager[a].Optional = true;
+            List<int> optionals = new List<int>();
+
+            optionals.Add(pManager.AddTextParameter("Path", "P", "Optional: Filepath if you want to load your own CSV data", GH_ParamAccess.item));
+            optionals.Add(pManager.AddBooleanParameter("Percentual", "%", "Optional: Percentual values instead of metric [false]", GH_ParamAccess.item));
+
+            foreach (int i in optionals) pManager[i].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -52,6 +56,7 @@ namespace Tortuga.GrasshopperComponents
 
         private Types.Assembly assembly;
         private string alternativeDataSourcePath;
+        private bool isPercentual;
 
         public override void CreateAttributes()
         {
@@ -70,6 +75,10 @@ namespace Tortuga.GrasshopperComponents
 
             GH_String path = new GH_String("");
             DA.GetData<GH_String>("Path", ref path);
+            GH_Boolean percentual = new GH_Boolean(false);
+            if (!DA.GetData<GH_Boolean>("Percentual", ref percentual)) percentual.Value = false;
+
+            this.isPercentual = percentual.Value;
             this.alternativeDataSourcePath = path.Value;
 
 
@@ -87,6 +96,8 @@ namespace Tortuga.GrasshopperComponents
             Grasshopper.GUI.GH_WindowsFormUtil.CenterFormOnCursor(materialEditor, true);
 
             materialEditor.materialEditor1.alternativeDataSourcePath = this.alternativeDataSourcePath;
+            materialEditor.materialEditor1.isPercentual = this.isPercentual;
+
             if (this.assembly != null) materialEditor.materialEditor1.assembly = this.assembly;
 
             materialEditor.ShowDialog();
@@ -136,6 +147,7 @@ namespace Tortuga.GrasshopperComponents
         }
     }
 
+/*
     public class Layer : GH_Component
     {
         public Layer() : base("Tortuga Material Layer", "Material Layer", "LCA Material Layer", "Tortuga", "Material") { }
@@ -190,6 +202,7 @@ namespace Tortuga.GrasshopperComponents
 
     }
 
+
     public class Assembly : GH_Component
     {
         public Assembly() : base("Tortuga Material Assembly", "Material Assembly", "LCA Material Assembly", "Tortuga", "Material") { }
@@ -240,7 +253,7 @@ namespace Tortuga.GrasshopperComponents
 
 
     }
-
+    */
 
 
 }

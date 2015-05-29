@@ -41,7 +41,7 @@ namespace Tortuga.Types
 
         public override string ToString()
         {
-            return string.Format("Tortuga Result ({0} CO2e)", this.GlobalWarmingPotential.Value);
+            return string.Format("Tortuga Result ({0} kgCO2e)", this.GlobalWarmingPotential.Value);
         }
     }
 
@@ -101,7 +101,7 @@ namespace Tortuga.Types
 
             TextBlock title = new TextBlock()
             {
-                Text = this.Name,
+                Text = String.Format("{0} ({1} kgCO2e/m3)",new string[]{this.Name, this.GlobalWarmingPotential.Value.ToString()}),
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Margin = new Thickness(5)
             };
@@ -247,7 +247,7 @@ namespace Tortuga.Types
 
             foreach (Layer layer in first.Layers)
             {
-                Layer lay = new Layer(layer.Material, layer.Width * factor);                
+                Layer lay = new Layer(layer.Material, layer.Width * factor, layer.isPercentual);                
                 assembly.Layers.Add(lay);
             }
        
@@ -267,12 +267,20 @@ namespace Tortuga.Types
         [DataMember]
         public double Width;
 
-        public Layer(Material material) { this.Width = 0.02; this.Material = material; }
+        [DataMember]
+        public bool isPercentual;
 
-        public Layer(Material material, double width) { this.Width = width; this.Material = material; }
+        public Layer(Material material, bool percentage)
+        { 
+            this.Width = (percentage)? 20 : 0.02;
+            this.Material = material;
+            this.isPercentual = percentage;
+        }
 
-        private static double heightMax = 0.2;
-        private static double heightMin = 0.02;
+        public Layer(Material material, double width, bool percentage) { this.Width = width; this.Material = material; this.isPercentual = percentage; }
+
+        private static double heightMax = 200;
+        private static double heightMin = 20;
 
         public ListViewItem Draw()
         {
@@ -286,14 +294,14 @@ namespace Tortuga.Types
             
             layerItem.Tag = this;
 
-            double width = this.Width;
+            double width = (this.isPercentual) ? this.Width : this.Width * 1000;
             if (width < Layer.heightMin) width = Layer.heightMin;
             else if (width > Layer.heightMax) width = Layer.heightMax;
 
             StackPanel panel = new StackPanel()
             {
                 Orientation = Orientation.Horizontal,
-                Height = width * 1000
+                Height = width
             };
 
             layerItem.Background = new SolidColorBrush(Colors.White);
@@ -312,14 +320,14 @@ namespace Tortuga.Types
 
             TextBlock unitLabel = new TextBlock()
             {
-                Text = "m",
+                Text = (this.isPercentual)? "%" : "m",
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Margin = new Thickness(5)
             };
 
             TextBlock title = new TextBlock()
             {
-                Text = this.Material.Name,
+                Text = String.Format("{0} ({1} kgCO2e/m3)", new string[] { this.Material.Name, this.GlobalWarmingPotential.Value.ToString() }),
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Margin = new Thickness(5)
             };
@@ -457,12 +465,16 @@ namespace Tortuga.Types
                 Layer layer = (Layer)textBox.Tag;
                 layer.Width = value;
 
-
-                if (value < Layer.heightMin) value = Layer.heightMin;
-                else if (value > Layer.heightMax) value = Layer.heightMax;
-
                 StackPanel panel = (StackPanel)textBox.Parent;
-                panel.Height = value * 1000;
+
+
+                double factor = (this.isPercentual)? value : value * 1000;
+                if (factor < Layer.heightMin) panel.Height = Layer.heightMin;
+                else if (factor > Layer.heightMax) panel.Height = Layer.heightMax;
+                else { panel.Height = factor; }
+
+                
+
 
 
             }

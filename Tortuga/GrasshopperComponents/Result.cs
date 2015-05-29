@@ -36,11 +36,11 @@ namespace Tortuga.GrasshopperComponents
 {
     public class Result : GH_Component
     {
-        public Result() : base("Tortuga Calculator Result", "Calculator Result", "Calculator LCA Values", "Tortuga", "Tortuga") { }
+        public Result() : base("Tortuga Calculator Result", "Calculator Result", "Calculator LCA Values", "Tortuga", "Result") { }
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("LCA Result", "L", "Calculated LCA Result", GH_ParamAccess.item);
+            pManager.AddGenericParameter("LCA Result", "L", "Calculated LCA Result", GH_ParamAccess.list);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -55,15 +55,34 @@ namespace Tortuga.GrasshopperComponents
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Types.Result result = new Types.Result();
-            DA.GetData<Types.Result>("LCA Result", ref result);
+            List<Types.Result> results = new List<Types.Result>();
+            DA.GetDataList<Types.Result>("LCA Result", results);
 
-            DA.SetData("GlobalWarmingPotential", result.GlobalWarmingPotential.Value);
-            DA.SetData("Acidification", result.Acidification.Value);
-            DA.SetData("DepletionOfNonrenewbles", result.DepletionOfNonrenewbles.Value);
-            DA.SetData("DepletionOfOzoneLayer", result.DepletionOfOzoneLayer.Value);
-            DA.SetData("Eutrophication", result.Eutrophication.Value);
-            DA.SetData("FormationTroposphericOzone", result.FormationTroposphericOzone.Value);
+            double GlobalWarmingPotential = 0;
+            double Acidification = 0;
+            double DepletionOfNonrenewbles = 0;
+            double DepletionOfOzoneLayer = 0;
+            double Eutrophication = 0;
+            double FormationTroposphericOzone = 0;
+
+
+
+            foreach (Types.Result result in results)
+            {
+                GlobalWarmingPotential += result.GlobalWarmingPotential.Value;
+                Acidification += result.Acidification.Value;
+                DepletionOfNonrenewbles += result.DepletionOfNonrenewbles.Value;
+                DepletionOfOzoneLayer += result.DepletionOfOzoneLayer.Value;
+                Eutrophication += result.Eutrophication.Value;
+                FormationTroposphericOzone += result.FormationTroposphericOzone.Value;
+            }
+
+            DA.SetData("GlobalWarmingPotential", GlobalWarmingPotential);
+            DA.SetData("Acidification", Acidification);
+            DA.SetData("DepletionOfNonrenewbles", DepletionOfNonrenewbles);
+            DA.SetData("DepletionOfOzoneLayer", DepletionOfOzoneLayer);
+            DA.SetData("Eutrophication", Eutrophication);
+            DA.SetData("FormationTroposphericOzone", FormationTroposphericOzone);
 
         }
 

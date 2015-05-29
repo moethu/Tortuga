@@ -49,6 +49,7 @@ namespace Tortuga.Controls
         private ListView MaterialSelector;
 
         public string alternativeDataSourcePath;
+        public bool isPercentual;
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
@@ -56,7 +57,8 @@ namespace Tortuga.Controls
             materialSelection.Children.Add(MaterialSelector);
             MaterialSelector.Background = Brushes.WhiteSmoke;
             MaterialSelector.BorderBrush = Brushes.WhiteSmoke;
-
+            MaterialSelector.VerticalAlignment = System.Windows.VerticalAlignment.Stretch;
+            MaterialSelector.HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
 
             if (System.IO.File.Exists(this.alternativeDataSourcePath))
             {
@@ -124,10 +126,12 @@ namespace Tortuga.Controls
             materialComposer.SelectionChanged += materialComposer_SelectionChanged;
             materialComposer.Background = Brushes.WhiteSmoke;
             materialComposer.BorderBrush = Brushes.WhiteSmoke;
+            materialComposer.VerticalAlignment = System.Windows.VerticalAlignment.Stretch;
+            materialComposer.HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
 
-            infoScreen = new TextBlock();
-            infoScreen.Margin = new Thickness(5);
-            materialAssemblyHost.Children.Add(infoScreen);
+            //infoScreen = new TextBlock();
+            //infoScreen.Margin = new Thickness(5);
+            //materialAssemblyHost.Children.Add(infoScreen);
 
             if (this.assembly == null) this.assembly = new Assembly();
             else this.assembly.Draw(this.materialComposer);
@@ -137,7 +141,7 @@ namespace Tortuga.Controls
 
         void materialComposer_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            infoScreen.Text = String.Format("Width: {0} m, {1} CO2e/m3 = {2} CO2e/m2", new object[] { assembly.Width, assembly.GlobalWarmingPotential.Value, assembly.GlobalWarmingPotential.Value * assembly.Width });
+            //infoScreen.Text = String.Format("Width: {0} m, {1} CO2e/m3 = {2} CO2e/m2", new object[] { assembly.Width, assembly.GlobalWarmingPotential.Value, assembly.GlobalWarmingPotential.Value * assembly.Width });
         }
 
         private ListViewItem AddListViewItem(string name)
@@ -160,7 +164,7 @@ namespace Tortuga.Controls
             {
                 ListViewItem lvi = (ListViewItem)MaterialSelector.SelectedItem;
                 Material mat = (Material)lvi.Tag;
-                Layer lay = new Layer(mat);
+                Layer lay = new Layer(mat, isPercentual);
                 assembly.AddLayer(materialComposer, lay);
 
             }
