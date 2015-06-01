@@ -202,10 +202,12 @@ namespace Tortuga.GrasshopperComponents
             
             pManager.AddCurveParameter("Curve", "C", "Curve to calculate", GH_ParamAccess.item);
             
-            optinalParameters.Add(pManager.AddNumberParameter("Radius", "Radius", "Radius to calculate", GH_ParamAccess.item));
-            
-            optinalParameters.Add(pManager.AddNumberParameter("Height", "Height", "Height to calculate", GH_ParamAccess.item));
-            optinalParameters.Add(pManager.AddNumberParameter("Width", "Width", "Width to calculate", GH_ParamAccess.item));
+            optinalParameters.Add(pManager.AddNumberParameter("Radius", "Radius", "Optional: Radius to calculate", GH_ParamAccess.item));
+
+            optinalParameters.Add(pManager.AddNumberParameter("Height", "Height", "Optional: Height to calculate", GH_ParamAccess.item));
+            optinalParameters.Add(pManager.AddNumberParameter("Width", "Width", "Optional: Width to calculate", GH_ParamAccess.item));
+
+            optinalParameters.Add(pManager.AddSurfaceParameter("Profile", "Profile", "Optional: Profile to calculate", GH_ParamAccess.item));
             
             foreach (int optional in optinalParameters) pManager[optional].Optional = true;
         }
@@ -224,20 +226,38 @@ namespace Tortuga.GrasshopperComponents
             GH_Number radius = new GH_Number(0);
             GH_Number height = new GH_Number(0);
             GH_Number width = new GH_Number(0);
+            GH_Surface profile = null;
 
             if (!DA.GetData<GH_Number>("Radius", ref radius)) radius.Value = 0;
             if (!DA.GetData<GH_Number>("Height", ref height)) height.Value = 0;
             if (!DA.GetData<GH_Number>("Width", ref width)) width.Value = 0;
+            if (!DA.GetData<GH_Surface>("Profile", ref profile)) profile = null;
             DA.GetData<GH_Curve>("Curve", ref curve);
 
-            
+            double calculationVolume = 0;
 
-            double calculationVolume = (radius.Value > 0) ? curve.Value.GetLength() * radius.Value * radius.Value * Math.PI : curve.Value.GetLength() * height.Value * width.Value;
 
-            if (radius.Value > 0)
-                drawColumn(curve.Value.PointAtStart, curve.Value.PointAtEnd, radius.Value);
+            if (profile != null)
+            {
+                calculationVolume = curve.Value.GetLength() * profile.Value.GetArea();
+                drawColumn(curve.Value.PointAtStart, curve.Value.PointAtEnd,profile.Value);
+            }
             else
-                drawColumn(curve.Value.PointAtStart, curve.Value.PointAtEnd, height.Value, width.Value);
+            {
+                if (radius.Value > 0)
+                {
+                    drawColumn(curve.Value.PointAtStart, curve.Value.PointAtEnd, radius.Value);
+                    calculationVolume = curve.Value.GetLength() * radius.Value * radius.Value * Math.PI;
+                }
+                else
+                {
+                    drawColumn(curve.Value.PointAtStart, curve.Value.PointAtEnd, height.Value, width.Value);
+                    calculationVolume = curve.Value.GetLength() * height.Value * width.Value;
+                }
+            }
+
+ 
+                
 
             Types.Result result = new Types.Result()
             {
@@ -411,6 +431,16 @@ namespace Tortuga.GrasshopperComponents
             Rhino.Geometry.Surface srf = Rhino.Geometry.Surface.CreateExtrusion(c.ToNurbsCurve(), new Rhino.Geometry.Vector3d((point2 - point1)));
             
             SetPreview(srf.ToBrep());
+        }
+
+        public void drawColumn(Rhino.Geometry.Point3d point1, Rhino.Geometry.Point3d point2, Rhino.Geometry.Brep brep)
+        {
+            foreach (Rhino.Geometry.Curve curve in brep.Curves3D)
+            {
+                Rhino.Geometry.Surface srf = Rhino.Geometry.Surface.CreateExtrusion(curve, new Rhino.Geometry.Vector3d((point2 - point1)));
+                SetPreview(srf.ToBrep());
+            }
+            
         }
 
         public void drawColumn(Rhino.Geometry.Point3d point1, Rhino.Geometry.Point3d point2, double height, double width)
