@@ -70,6 +70,7 @@
       <DependentUpon>MaterialEditorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="GrasshopperComponents\Operators.cs" />
+    <Compile Include="GrasshopperComponents\Profile.cs" />
     <Compile Include="GrasshopperComponents\Result.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

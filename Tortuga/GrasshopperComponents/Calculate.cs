@@ -198,6 +198,7 @@ namespace Tortuga.GrasshopperComponents
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Material", "Material", "Tortuga Material", GH_ParamAccess.item);
+
             List<int> optinalParameters = new List<int>();
             
             pManager.AddCurveParameter("Curve", "C", "Curve to calculate", GH_ParamAccess.item);
@@ -207,7 +208,7 @@ namespace Tortuga.GrasshopperComponents
             optinalParameters.Add(pManager.AddNumberParameter("Height", "Height", "Optional: Height to calculate", GH_ParamAccess.item));
             optinalParameters.Add(pManager.AddNumberParameter("Width", "Width", "Optional: Width to calculate", GH_ParamAccess.item));
 
-            optinalParameters.Add(pManager.AddSurfaceParameter("Profile", "Profile", "Optional: Profile to calculate", GH_ParamAccess.item));
+            optinalParameters.Add(pManager.AddGenericParameter("Profile", "Profile", "Optional: Profile to calculate", GH_ParamAccess.item));
             
             foreach (int optional in optinalParameters) pManager[optional].Optional = true;
         }
@@ -226,12 +227,12 @@ namespace Tortuga.GrasshopperComponents
             GH_Number radius = new GH_Number(0);
             GH_Number height = new GH_Number(0);
             GH_Number width = new GH_Number(0);
-            GH_Surface profile = null;
+            Types.Profile profile = null;
 
             if (!DA.GetData<GH_Number>("Radius", ref radius)) radius.Value = 0;
             if (!DA.GetData<GH_Number>("Height", ref height)) height.Value = 0;
             if (!DA.GetData<GH_Number>("Width", ref width)) width.Value = 0;
-            if (!DA.GetData<GH_Surface>("Profile", ref profile)) profile = null;
+            if (!DA.GetData<Types.Profile>("Profile", ref profile)) profile = null;
             DA.GetData<GH_Curve>("Curve", ref curve);
 
             double calculationVolume = 0;
@@ -239,8 +240,8 @@ namespace Tortuga.GrasshopperComponents
 
             if (profile != null)
             {
-                calculationVolume = curve.Value.GetLength() * profile.Value.GetArea();
-                drawColumn(curve.Value.PointAtStart, curve.Value.PointAtEnd,profile.Value);
+                calculationVolume = curve.Value.GetLength() * profile.Area;
+                drawColumn(curve.Value.PointAtStart, curve.Value.PointAtEnd, profile.Area);
             }
             else
             {
