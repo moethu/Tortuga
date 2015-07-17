@@ -30,6 +30,55 @@ using System.Runtime.Serialization;
 namespace Tortuga.Types
 {
 
+
+
+    public class LifecycleStage
+    {
+        [DataMember]
+        public string Name;
+
+        [DataMember]
+        public int Column;
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
+
+        public static bool ScrambledEquals<T>(IEnumerable<T> list1, IEnumerable<T> list2)
+        {
+            if (list1 == null && list2 == null) return true;
+            if (list1 == null || list2 == null) return false;
+
+            var cnt = new Dictionary<string, int>();
+            foreach (T s in list1)
+            {
+                if (cnt.ContainsKey(s.ToString()))
+                {
+                    cnt[s.ToString()]++;
+                }
+                else
+                {
+                    cnt.Add(s.ToString(), 1);
+                }
+            }
+            foreach (T s in list2)
+            {
+                if (cnt.ContainsKey(s.ToString()))
+                {
+                    cnt[s.ToString()]--;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return cnt.Values.All(c => c == 0);
+        }
+
+    }
+
+
     public class Result
     {
         public UnitDouble<LCA.CO2e> GlobalWarmingPotential;
@@ -70,6 +119,9 @@ namespace Tortuga.Types
 
         [DataMember]
         public UnitDouble<LCA.MJ> DepletionOfNonrenewbles;
+
+        [DataMember]
+        public List<LifecycleStage> Stages;
 
         public Material() 
         {
@@ -115,12 +167,81 @@ namespace Tortuga.Types
             return layerItem;
 
         }
+
+        public void CopyFrom(Material source)
+        {
+            this.Acidification = source.Acidification;
+            this.GlobalWarmingPotential = source.GlobalWarmingPotential;
+            this.Eutrophication = source.Eutrophication;
+
+            this.FormationTroposphericOzone = source.FormationTroposphericOzone;
+            this.DepletionOfNonrenewbles = source.DepletionOfNonrenewbles;
+            this.DepletionOfOzoneLayer = source.DepletionOfOzoneLayer;
+
+            this.Stages = source.Stages;
+        }
+
+        public static Dictionary<string,Material> LoadedMaterials = new Dictionary<string,Material>();
+
+        public static void LoadFrom(string filename, List<LifecycleStage> stages)
+        {
+            if (System.IO.File.Exists(filename))
+            {
+                LoadedMaterials.Clear();
+
+                string[] data = System.IO.File.ReadAllLines(filename);
+
+
+                for (int i = 1; i < data.Length; i++)
+                {
+                    string[] fields = data[i].Split(',');
+
+                    if (fields.Length == 19)
+                    {
+                        UnitDouble<Types.LCA.CO2e> GWP = new UnitDouble<LCA.CO2e>(0);
+                        UnitDouble<Types.LCA.kgSO2> Acidification = new UnitDouble<LCA.kgSO2>(0);
+                        UnitDouble<Types.LCA.MJ> DepletionOfNonrenewbles = new UnitDouble<LCA.MJ>(0);
+                        UnitDouble<Types.LCA.kgCFC11> DepletionOfOzoneLayer = new UnitDouble<LCA.kgCFC11>(0);
+                        UnitDouble<Types.LCA.kgPhostphate> Eutrophication = new UnitDouble<LCA.kgPhostphate>(0);
+                        UnitDouble<Types.LCA.kgNOx> FormationTroposphericOzone = new UnitDouble<LCA.kgNOx>(0);
+
+                        foreach (LifecycleStage stage in stages)
+                        {
+                            GWP += new UnitDouble<Types.LCA.CO2e>(double.Parse(fields[1 + stage.Column]));
+                            Acidification += new UnitDouble<Types.LCA.kgSO2>(double.Parse(fields[4 + stage.Column]));
+                            DepletionOfNonrenewbles += new UnitDouble<Types.LCA.MJ>(double.Parse(fields[7 + stage.Column]));
+                            DepletionOfOzoneLayer += new UnitDouble<Types.LCA.kgCFC11>(double.Parse(fields[10 + stage.Column]));
+                            Eutrophication += new UnitDouble<Types.LCA.kgPhostphate>(double.Parse(fields[13 + stage.Column]));
+                            FormationTroposphericOzone += new UnitDouble<Types.LCA.kgNOx>(double.Parse(fields[16 + stage.Column]));
+                        }
+
+                        Tortuga.Types.Material material = new Material()
+                        {
+                            Name = fields[0],
+
+                            GlobalWarmingPotential = GWP,
+                            Acidification = Acidification,
+                            DepletionOfNonrenewbles = DepletionOfNonrenewbles,
+                            DepletionOfOzoneLayer = DepletionOfOzoneLayer,
+                            Eutrophication = Eutrophication,
+                            FormationTroposphericOzone = FormationTroposphericOzone,
+                        };
+
+                        material.Stages = stages;
+
+                        LoadedMaterials.Add(material.Name, material);
+                    }
+                }
+
+            }
+        }
     }
 
     [DataContract]
     [XmlSerializerFormat]
     [KnownType(typeof(Layer))]
     [KnownType(typeof(Material))]
+    [KnownType(typeof(LifecycleStage))]
     [KnownType(typeof(UnitDouble<LCA.CO2e>))]
     [KnownType(typeof(LCA.CO2e))]
     [KnownType(typeof(UnitDouble<LCA.kgCFC11>))]

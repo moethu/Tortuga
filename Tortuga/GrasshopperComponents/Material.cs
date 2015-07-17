@@ -46,6 +46,10 @@ namespace Tortuga.GrasshopperComponents
             optionals.Add(pManager.AddTextParameter("Path", "P", "Optional: Filepath if you want to load your own CSV data", GH_ParamAccess.item));
             optionals.Add(pManager.AddBooleanParameter("Percentual", "%", "Optional: Percentual values instead of metric [false]", GH_ParamAccess.item));
 
+            optionals.Add(pManager.AddBooleanParameter("Production", "A1-A3", "Optional: Production Stage (A1-A3) [true]", GH_ParamAccess.item));
+            optionals.Add(pManager.AddBooleanParameter("Waste Processing", "C3", "Optional: Waste processing Stage (C3) [true]", GH_ParamAccess.item));
+            optionals.Add(pManager.AddBooleanParameter("Recycling Potential", "D", "Optional: Recycling Potential Stage (D) [true]", GH_ParamAccess.item));
+
             foreach (int i in optionals) pManager[i].Optional = true;
         }
 
@@ -57,6 +61,8 @@ namespace Tortuga.GrasshopperComponents
         private Types.Assembly assembly;
         private string alternativeDataSourcePath;
         private bool isPercentual;
+
+        private List<Types.LifecycleStage> Stages;
 
         public override void CreateAttributes()
         {
@@ -75,13 +81,39 @@ namespace Tortuga.GrasshopperComponents
 
             GH_String path = new GH_String("");
             DA.GetData<GH_String>("Path", ref path);
+
+
             GH_Boolean percentual = new GH_Boolean(false);
             if (!DA.GetData<GH_Boolean>("Percentual", ref percentual)) percentual.Value = false;
+
+            GH_Boolean productionStage = new GH_Boolean(true);
+            GH_Boolean wasteProcessingStage = new GH_Boolean(true);
+            GH_Boolean recyclingPotentialStage = new GH_Boolean(true); 
+
+            if (!DA.GetData<GH_Boolean>("Production", ref productionStage)) productionStage.Value = true;
+            if (!DA.GetData<GH_Boolean>("Waste Processing", ref wasteProcessingStage)) wasteProcessingStage.Value = true;
+            if (!DA.GetData<GH_Boolean>("Recycling Potential", ref recyclingPotentialStage)) recyclingPotentialStage.Value = true;
+
+            Stages = new List<Types.LifecycleStage>();
+            if (productionStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "Production", Column = 0 });
+            if (wasteProcessingStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "Waste Processing", Column = 1 });
+            if (recyclingPotentialStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "Recycling Potential", Column = 2 });
 
             this.isPercentual = percentual.Value;
             this.alternativeDataSourcePath = path.Value;
 
+            Types.Material.LoadFrom(this.alternativeDataSourcePath, this.Stages);
 
+            if (this.assembly != null)
+            {
+                foreach (Types.Layer layer in this.assembly.Layers)
+                {
+                    if (Types.Material.LoadedMaterials.ContainsKey(layer.Material.Name))
+                    {
+                        layer.Material.CopyFrom(Types.Material.LoadedMaterials[layer.Material.Name]);
+                    }
+                }
+            }
 
             //if (assembly != null) this.SetValue("assembly", Serialization.Utilities.Serialize(this.assembly));
 
@@ -97,6 +129,8 @@ namespace Tortuga.GrasshopperComponents
 
             materialEditor.materialEditor1.alternativeDataSourcePath = this.alternativeDataSourcePath;
             materialEditor.materialEditor1.isPercentual = this.isPercentual;
+            materialEditor.materialEditor1.Stages = this.Stages;
+
 
             if (this.assembly != null) materialEditor.materialEditor1.assembly = this.assembly;
 

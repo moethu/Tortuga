@@ -1,4 +1,4 @@
-MaterialName, GlobalWarmingPotential, Acidification, DepletionOfNonrenewbles, DepletionOfOzoneLayer, Eutrophication, FormationTroposphericOzone
-Material1,1,1,1,1,1,1
-Material2,2,2,2,2,2,2
-Material3,3,3,3,3,3,3
+MaterialName, GlobalWarmingPotential (A1-A3), GlobalWarmingPotential (C3), GlobalWarmingPotential (D), Acidification (A1-A3), Acidification (C3), Acidification (D), DepletionOfNonrenewbles (A1-A3), DepletionOfNonrenewbles (C3), DepletionOfNonrenewbles (D), DepletionOfOzoneLayer (A1-A3), DepletionOfOzoneLayer (C3), DepletionOfOzoneLayer (D), Eutrophication (A1-A3), Eutrophication (C3), Eutrophication (D), FormationTroposphericOzone (A1-A3), FormationTroposphericOzone (C3), FormationTroposphericOzone (D)
+Material1,1,2,3,4,5,6,7,8,1,1,1,1,1,1,1,1,1,1
+Material2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+Material3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3

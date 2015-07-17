@@ -51,6 +51,13 @@ namespace Tortuga.Controls
         public string alternativeDataSourcePath;
         public bool isPercentual;
 
+        public List<LifecycleStage> Stages;
+        private Dictionary<string, Material> Materials;
+
+        
+
+
+
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
             MaterialSelector = new ListView();
@@ -60,63 +67,12 @@ namespace Tortuga.Controls
             MaterialSelector.VerticalAlignment = System.Windows.VerticalAlignment.Stretch;
             MaterialSelector.HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
 
-            if (System.IO.File.Exists(this.alternativeDataSourcePath))
-            {
-                string[] data = System.IO.File.ReadAllLines(this.alternativeDataSourcePath);
+            foreach (Material material in Material.LoadedMaterials.Values.ToList())
+                MaterialSelector.Items.Add(material.Draw());
 
 
-                for(int i = 1; i < data.Length; i++)
-                {
-                    string[] fields = data[i].Split(',');
-
-                    if (fields.Length == 7)
-                    {
-                        Tortuga.Types.Material material = new Material()
-                        {
-                            Name = fields[0],
-
-                            GlobalWarmingPotential = new UnitDouble<Types.LCA.CO2e>(double.Parse(fields[1])),
-                            Acidification = new UnitDouble<Types.LCA.kgSO2>(double.Parse(fields[2])),
-                            DepletionOfNonrenewbles = new UnitDouble<Types.LCA.MJ>(double.Parse(fields[3])),
-                            DepletionOfOzoneLayer = new UnitDouble<Types.LCA.kgCFC11>(double.Parse(fields[4])),
-                            Eutrophication = new UnitDouble<Types.LCA.kgPhostphate>(double.Parse(fields[5])),
-                            FormationTroposphericOzone = new UnitDouble<Types.LCA.kgNOx>(double.Parse(fields[6])),
-                        };
-
-                        MaterialSelector.Items.Add(material.Draw());
-                    
-                    }
-                }
-            
-            }
-
-
-
-
-
-            Tortuga.Types.Material material1 = new Material()
-            {
-                Name = "TestMaterial",
-                GlobalWarmingPotential = new UnitDouble<Types.LCA.CO2e>(1),
-                Acidification = new UnitDouble<Types.LCA.kgSO2>(2),
-                DepletionOfNonrenewbles = new UnitDouble<Types.LCA.MJ>(3),
-                DepletionOfOzoneLayer = new UnitDouble<Types.LCA.kgCFC11>(4),
-                Eutrophication = new UnitDouble<Types.LCA.kgPhostphate>(5),
-                FormationTroposphericOzone = new UnitDouble<Types.LCA.kgNOx>(6)
-            };
-
-
-
-            MaterialSelector.Items.Add(material1.Draw());
 
             MaterialSelector.Height = 500;
-
-
-
-
-
-
-
 
 
             materialComposer = new ListView();
@@ -133,8 +89,14 @@ namespace Tortuga.Controls
             //infoScreen.Margin = new Thickness(5);
             //materialAssemblyHost.Children.Add(infoScreen);
 
-            if (this.assembly == null) this.assembly = new Assembly();
-            else this.assembly.Draw(this.materialComposer);
+            if (this.assembly == null) { this.assembly = new Assembly(); }
+            else
+            {
+
+
+                this.assembly.Draw(this.materialComposer);
+
+            }
 
 
         }
