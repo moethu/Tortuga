@@ -181,12 +181,13 @@ namespace Tortuga.Types
             this.Stages = source.Stages;
         }
 
-        public static Dictionary<string,Material> LoadedMaterials = new Dictionary<string,Material>();
+        public static SortedDictionary<string, Material> LoadedMaterials = new SortedDictionary<string, Material>();
 
         public static void LoadFrom(string filename, List<LifecycleStage> stages)
         {
             if (System.IO.File.Exists(filename))
             {
+
                 LoadedMaterials.Clear();
 
                 string[] data = System.IO.File.ReadAllLines(filename);

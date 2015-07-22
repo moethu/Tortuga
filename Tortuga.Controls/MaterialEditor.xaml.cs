@@ -60,12 +60,18 @@ namespace Tortuga.Controls
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
+            searchField.Text = "Search";
+            searchField.Foreground = Brushes.Gray;
+            
+
             MaterialSelector = new ListView();
             materialSelection.Children.Add(MaterialSelector);
             MaterialSelector.Background = Brushes.WhiteSmoke;
             MaterialSelector.BorderBrush = Brushes.WhiteSmoke;
             MaterialSelector.VerticalAlignment = System.Windows.VerticalAlignment.Stretch;
             MaterialSelector.HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
+
+            
 
             foreach (Material material in Material.LoadedMaterials.Values.ToList())
                 MaterialSelector.Items.Add(material.Draw());
@@ -98,7 +104,7 @@ namespace Tortuga.Controls
 
             }
 
-
+            searchField.TextChanged += searchField_TextChanged;
         }
 
         void materialComposer_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -144,6 +150,36 @@ namespace Tortuga.Controls
                 assembly.Layers.Remove(mat);
                 materialComposer.Items.RemoveAt(materialComposer.SelectedIndex);
             }
+        }
+
+        private void TextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (searchField.Text == "Search")
+            {
+                searchField.Text = "";
+                searchField.Foreground = Brushes.Black;
+            }
+        }
+
+        private void searchField_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (searchField.Text == "")
+            {
+                searchField.Text = "Search";
+                searchField.Foreground = Brushes.Gray;
+            }
+        }
+
+        private void searchField_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            MaterialSelector.Items.Clear();
+
+            foreach (Material material in Material.LoadedMaterials.Values.ToList())
+            {
+                if (searchField.Text == "Search" || searchField.Text == "" || material.Name.ToLower().Contains(searchField.Text.ToLower()))
+                    MaterialSelector.Items.Add(material.Draw());
+            }
+                
         }
 
 
