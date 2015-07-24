@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Tortuga.Properties {
+namespace Tortuga.Types.Properties {
     using System;
     
     
@@ -22,7 +22,7 @@ namespace Tortuga.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,10 +36,10 @@ namespace Tortuga.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Tortuga.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Tortuga.Types.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -51,7 +51,7 @@ namespace Tortuga.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,9 +63,9 @@ namespace Tortuga.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tortuga_add {
+        public static System.Drawing.Bitmap bullet_arrow_bottom {
             get {
-                object obj = ResourceManager.GetObject("tortuga_add", resourceCulture);
+                object obj = ResourceManager.GetObject("bullet_arrow_bottom", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace Tortuga.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tortuga_calc {
+        public static System.Drawing.Bitmap bullet_arrow_down {
             get {
-                object obj = ResourceManager.GetObject("tortuga_calc", resourceCulture);
+                object obj = ResourceManager.GetObject("bullet_arrow_down", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace Tortuga.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tortuga_edit {
+        public static System.Drawing.Bitmap bullet_arrow_left {
             get {
-                object obj = ResourceManager.GetObject("tortuga_edit", resourceCulture);
+                object obj = ResourceManager.GetObject("bullet_arrow_left", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -93,9 +93,9 @@ namespace Tortuga.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tortuga_folder {
+        public static System.Drawing.Bitmap bullet_arrow_right {
             get {
-                object obj = ResourceManager.GetObject("tortuga_folder", resourceCulture);
+                object obj = ResourceManager.GetObject("bullet_arrow_right", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace Tortuga.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tortuga_hammer {
+        public static System.Drawing.Bitmap bullet_arrow_top {
             get {
-                object obj = ResourceManager.GetObject("tortuga_hammer", resourceCulture);
+                object obj = ResourceManager.GetObject("bullet_arrow_top", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -113,9 +113,9 @@ namespace Tortuga.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tortuga_linear {
+        public static System.Drawing.Bitmap bullet_arrow_up {
             get {
-                object obj = ResourceManager.GetObject("tortuga_linear", resourceCulture);
+                object obj = ResourceManager.GetObject("bullet_arrow_up", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -123,9 +123,9 @@ namespace Tortuga.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tortuga_multi {
+        public static System.Drawing.Bitmap cross {
             get {
-                object obj = ResourceManager.GetObject("tortuga_multi", resourceCulture);
+                object obj = ResourceManager.GetObject("cross", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -133,29 +133,9 @@ namespace Tortuga.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tortuga_result {
+        public static System.Drawing.Bitmap error {
             get {
-                object obj = ResourceManager.GetObject("tortuga_result", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap tortuga_surface {
-            get {
-                object obj = ResourceManager.GetObject("tortuga_surface", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap tortuga_volume {
-            get {
-                object obj = ResourceManager.GetObject("tortuga_volume", resourceCulture);
+                object obj = ResourceManager.GetObject("error", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

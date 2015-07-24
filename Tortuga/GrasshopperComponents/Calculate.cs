@@ -98,7 +98,7 @@ namespace Tortuga.GrasshopperComponents
         {
             get
             {
-                return Properties.Resources.tortuga_calc;
+                return Properties.Resources.tortuga_surface;
             }
         }
         public override GH_Exposure Exposure
@@ -177,7 +177,7 @@ namespace Tortuga.GrasshopperComponents
         {
             get
             {
-                return Properties.Resources.tortuga_calc;
+                return Properties.Resources.tortuga_volume;
             }
         }
         public override GH_Exposure Exposure
@@ -288,7 +288,7 @@ namespace Tortuga.GrasshopperComponents
         {
             get
             {
-                return Properties.Resources.tortuga_calc;
+                return Properties.Resources.tortuga_linear;
             }
         }
         public override GH_Exposure Exposure
@@ -395,7 +395,7 @@ namespace Tortuga.GrasshopperComponents
         {
             get
             {
-                return Properties.Resources.tortuga_calc;
+                return Properties.Resources.tortuga_hammer;
             }
         }
         public override GH_Exposure Exposure

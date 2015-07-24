@@ -68,7 +68,7 @@ namespace Tortuga.GrasshopperComponents
         {
             get
             {
-                return Properties.Resources.tortuga_result;
+                return Properties.Resources.tortuga_folder;
             }
         }
         public override GH_Exposure Exposure
@@ -128,7 +128,7 @@ namespace Tortuga.GrasshopperComponents
         {
             get
             {
-                return Properties.Resources.tortuga_result;
+                return Properties.Resources.tortuga_folder;
             }
         }
         public override GH_Exposure Exposure

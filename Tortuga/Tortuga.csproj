@@ -114,6 +114,21 @@
   <ItemGroup>
     <None Include="Resources\tortuga-multi.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tortuga-folder.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tortuga-volume.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tortuga-linear.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tortuga-surface.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tortuga-hammer.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

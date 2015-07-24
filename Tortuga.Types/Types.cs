@@ -159,7 +159,19 @@ namespace Tortuga.Types
             };
 
 
+            if (this.GlobalWarmingPotential.Value == 0)
+            {
+                Image img = new Image();
+                img.Source = Utilities.GetSourceFromBitmap(Properties.Resources.error);
+                img.Height = 16; img.Width = 16;
+                panel.Children.Add(img);
+            }
+
             panel.Children.Add(title);
+
+
+
+
             panel.Margin = new Thickness(2);
 
             layerItem.Content = panel;
@@ -442,7 +454,7 @@ namespace Tortuga.Types
 
             TextBlock unitLabel = new TextBlock()
             {
-                Text = (this.isPercentual)? "%" : "m",
+                Text = (this.isPercentual)? "0.01%" : "m",
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Margin = new Thickness(5)
             };
@@ -518,18 +530,19 @@ namespace Tortuga.Types
         public static void BuildContextMenu()
         {
             contextMenu = new ContextMenu();
-            MenuItem moveUp = new MenuItem() { Header = "move up" }; moveUp.Click += move_Click;
-            MenuItem moveDown = new MenuItem() { Header = "move down" }; moveDown.Click += move_Click;
-            MenuItem moveTop = new MenuItem() { Header = "move top" }; moveTop.Click += move_Click;
-            MenuItem moveBottom = new MenuItem() { Header = "move bottom" }; moveBottom.Click += move_Click;
+            MenuItem moveUp = new MenuItem() { Header = "move up", Icon = new Image() { Source = Utilities.GetSourceFromBitmap(Properties.Resources.bullet_arrow_up)} }; moveUp.Click += move_Click;
+            MenuItem moveDown = new MenuItem() { Header = "move down", Icon = new Image() { Source = Utilities.GetSourceFromBitmap(Properties.Resources.bullet_arrow_down) } }; moveDown.Click += move_Click;
+            MenuItem moveTop = new MenuItem() { Header = "move top", Icon = new Image() { Source = Utilities.GetSourceFromBitmap(Properties.Resources.bullet_arrow_top) } }; moveTop.Click += move_Click;
+            MenuItem moveBottom = new MenuItem() { Header = "move bottom", Icon = new Image() { Source = Utilities.GetSourceFromBitmap(Properties.Resources.bullet_arrow_bottom) } }; moveBottom.Click += move_Click;
+
 
             contextMenu.Items.Add(moveUp);
             contextMenu.Items.Add(moveDown);
             contextMenu.Items.Add(moveTop);
             contextMenu.Items.Add(moveBottom);
+
         
         }
-
 
 
         static void move_Click(object sender, RoutedEventArgs e)
