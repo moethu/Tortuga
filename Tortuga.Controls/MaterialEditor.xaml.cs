@@ -182,6 +182,18 @@ namespace Tortuga.Controls
                 
         }
 
+        private void closeButton_Click(object sender, RoutedEventArgs e)
+        {
+            Window parentWindow = Window.GetWindow(this);
+            parentWindow.Close();
+        }
+
+        private void UserControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Window parentWindow = Window.GetWindow(this);
+            parentWindow.DragMove();
+        }
+
 
 
 
