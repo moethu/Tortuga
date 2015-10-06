@@ -39,7 +39,7 @@ namespace Tortuga.Forms
 
         private void MaterialEditorForm_Load(object sender, EventArgs e)
         {
-
+            this.materialEditor1.ParentWindow = (Form)this;
         }
     }
 }

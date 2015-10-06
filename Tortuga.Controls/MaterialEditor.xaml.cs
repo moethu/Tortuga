@@ -43,18 +43,16 @@ namespace Tortuga.Controls
             InitializeComponent();
         }
 
-        private TextBlock infoScreen;
-        public Assembly assembly;
-        private ListView materialComposer;
+
+        public Material material;
+
         private ListView MaterialSelector;
 
         public string alternativeDataSourcePath;
-        public bool isPercentual;
+        public System.Windows.Forms.Form ParentWindow;
 
-        public List<LifecycleStage> Stages;
         private Dictionary<string, Material> Materials;
-
-        
+     
 
 
 
@@ -71,46 +69,28 @@ namespace Tortuga.Controls
             MaterialSelector.VerticalAlignment = System.Windows.VerticalAlignment.Stretch;
             MaterialSelector.HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
 
-            
+
 
             foreach (Material material in Material.LoadedMaterials.Values.ToList())
-                MaterialSelector.Items.Add(material.Draw());
+            {
+                ListViewItem lvi = material.Draw();
+                int index = MaterialSelector.Items.Add(lvi);
+                if (this.material != null)
+                {
+                    if (this.material.Name == material.Name) { MaterialSelector.SelectedIndex = index; }
+                }
 
+            }
 
 
             MaterialSelector.Height = 500;
 
 
-            materialComposer = new ListView();
-            materialAssemblyHost.Children.Add(materialComposer);
-            materialComposer.Height = 500;
-            
-            materialComposer.SelectionChanged += materialComposer_SelectionChanged;
-            materialComposer.Background = Brushes.WhiteSmoke;
-            materialComposer.BorderBrush = Brushes.WhiteSmoke;
-            materialComposer.VerticalAlignment = System.Windows.VerticalAlignment.Stretch;
-            materialComposer.HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
-
-            //infoScreen = new TextBlock();
-            //infoScreen.Margin = new Thickness(5);
-            //materialAssemblyHost.Children.Add(infoScreen);
-
-            if (this.assembly == null) { this.assembly = new Assembly(); }
-            else
-            {
-
-
-                this.assembly.Draw(this.materialComposer);
-
-            }
 
             searchField.TextChanged += searchField_TextChanged;
         }
 
-        void materialComposer_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //infoScreen.Text = String.Format("Width: {0} m, {1} CO2e/m3 = {2} CO2e/m2", new object[] { assembly.Width, assembly.GlobalWarmingPotential.Value, assembly.GlobalWarmingPotential.Value * assembly.Width });
-        }
+
 
         private ListViewItem AddListViewItem(string name)
         {
@@ -125,32 +105,6 @@ namespace Tortuga.Controls
         
         }
 
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            if (MaterialSelector.SelectedItem != null)
-            {
-                ListViewItem lvi = (ListViewItem)MaterialSelector.SelectedItem;
-                Material mat = (Material)lvi.Tag;
-                Layer lay = new Layer(mat, isPercentual);
-                assembly.AddLayer(materialComposer, lay);
-
-            }
-            
-
-            
-        }
-
-        private void Remove_Click(object sender, RoutedEventArgs e)
-        {
-            if (materialComposer.SelectedItem != null)
-            {
-                ListViewItem lvi = (ListViewItem)materialComposer.SelectedItem;
-                Layer mat = (Layer)lvi.Tag;
-                assembly.Layers.Remove(mat);
-                materialComposer.Items.RemoveAt(materialComposer.SelectedIndex);
-            }
-        }
 
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
@@ -184,14 +138,15 @@ namespace Tortuga.Controls
 
         private void closeButton_Click(object sender, RoutedEventArgs e)
         {
-            Window parentWindow = Window.GetWindow(this);
-            parentWindow.Close();
-        }
+            if (MaterialSelector.SelectedItem != null)
+            {
+                ListViewItem item = (ListViewItem)MaterialSelector.SelectedItem;
+                this.material = (Types.Material)item.Tag;
+            }
 
-        private void UserControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Window parentWindow = Window.GetWindow(this);
-            parentWindow.DragMove();
+
+            ParentWindow.Close();
+            
         }
 
 

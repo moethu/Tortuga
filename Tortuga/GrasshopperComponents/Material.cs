@@ -44,7 +44,6 @@ namespace Tortuga.GrasshopperComponents
             List<int> optionals = new List<int>();
 
             optionals.Add(pManager.AddTextParameter("Path", "P", "Optional: Filepath if you want to load your own CSV data", GH_ParamAccess.item));
-            optionals.Add(pManager.AddBooleanParameter("Percentual", "%", "Optional: Percentual values instead of metric [false]", GH_ParamAccess.item));
 
             optionals.Add(pManager.AddBooleanParameter("Production", "A1-A3", "Optional: Production Stage (A1-A3) [true]", GH_ParamAccess.item));
             optionals.Add(pManager.AddBooleanParameter("Waste Processing", "C3", "Optional: Waste processing Stage (C3) [true]", GH_ParamAccess.item));
@@ -58,9 +57,8 @@ namespace Tortuga.GrasshopperComponents
             pManager.AddGenericParameter("Material", "M", "Tortuga Material", GH_ParamAccess.item);
         }
 
-        private Types.Assembly assembly;
+        private Types.Material material;
         private string alternativeDataSourcePath;
-        private bool isPercentual;
 
         private List<Types.LifecycleStage> Stages;
 
@@ -71,20 +69,16 @@ namespace Tortuga.GrasshopperComponents
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string serializedData = this.GetValue("assembly", "");
+            string serializedData = this.GetValue("material", "");
             
             if (serializedData != "")
             {
-                this.assembly = (Types.Assembly)Serialization.Utilities.Deserialize(serializedData, typeof(Types.Assembly));
+                this.material = (Types.Material)Serialization.Utilities.Deserialize(serializedData, typeof(Types.Material));
             }
-
 
             GH_String path = new GH_String("");
             DA.GetData<GH_String>("Path", ref path);
 
-
-            GH_Boolean percentual = new GH_Boolean(false);
-            if (!DA.GetData<GH_Boolean>("Percentual", ref percentual)) percentual.Value = false;
 
             GH_Boolean productionStage = new GH_Boolean(true);
             GH_Boolean wasteProcessingStage = new GH_Boolean(true);
@@ -94,54 +88,29 @@ namespace Tortuga.GrasshopperComponents
             if (!DA.GetData<GH_Boolean>("Waste Processing", ref wasteProcessingStage)) wasteProcessingStage.Value = true;
             if (!DA.GetData<GH_Boolean>("Recycling Potential", ref recyclingPotentialStage)) recyclingPotentialStage.Value = true;
 
+
             Stages = new List<Types.LifecycleStage>();
             if (productionStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "Production", Column = 0 });
             if (wasteProcessingStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "Waste Processing", Column = 1 });
             if (recyclingPotentialStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "Recycling Potential", Column = 2 });
 
-            this.isPercentual = percentual.Value;
             this.alternativeDataSourcePath = path.Value;
 
             Types.Material.LoadFrom(this.alternativeDataSourcePath, this.Stages);
 
-            if (this.assembly != null)
-            {
-                foreach (Types.Layer layer in this.assembly.Layers)
-                {
-                    if (Types.Material.LoadedMaterials.ContainsKey(layer.Material.Name))
-                    {
-                        layer.Material.CopyFrom(Types.Material.LoadedMaterials[layer.Material.Name]);
-                    }
-                }
-            }
 
-            //if (assembly != null) this.SetValue("assembly", Serialization.Utilities.Serialize(this.assembly));
-
-            DA.SetData("Material", assembly);
+            DA.SetData("Material", this.material);
         }
 
         public void ShowEditor()
         {
-
             Forms.MaterialEditorForm materialEditor = new Forms.MaterialEditorForm();
-
             Grasshopper.GUI.GH_WindowsFormUtil.CenterFormOnCursor(materialEditor, true);
-
             materialEditor.materialEditor1.alternativeDataSourcePath = this.alternativeDataSourcePath;
-            materialEditor.materialEditor1.isPercentual = this.isPercentual;
-            materialEditor.materialEditor1.Stages = this.Stages;
-
-
-            if (this.assembly != null) materialEditor.materialEditor1.assembly = this.assembly;
-
+            if (this.material != null) materialEditor.materialEditor1.material = this.material;
             materialEditor.ShowDialog();
-
-           // this.assembly = materialEditor.materialEditor1.assembly;
-
-            this.SetValue("assembly", Serialization.Utilities.Serialize(materialEditor.materialEditor1.assembly));
-
-            this.ExpireSolution(true);
-            
+            this.SetValue("material", Serialization.Utilities.Serialize(materialEditor.materialEditor1.material));
+            this.ExpireSolution(true);           
         }
 
         // Properties
@@ -169,6 +138,190 @@ namespace Tortuga.GrasshopperComponents
 
 
     }
+
+    public class MaterialLayer : GH_Component
+    {
+        public MaterialLayer() : base("Tortuga Material Layer", "Material Layer", "LCA Material Layer", "Tortuga", "Material") { }
+
+        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Material", "M", "LCA Material", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Thickness", "T", "Thickness", GH_ParamAccess.item);
+        }
+
+        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Layer", "L", "Tortuga Material Layer", GH_ParamAccess.item);
+        }
+
+        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            Tortuga.Types.Material material = null;
+            DA.GetData<Tortuga.Types.Material>(0, ref material);
+
+            GH_Number thickness = new GH_Number(0);
+            DA.GetData<GH_Number>(1, ref thickness);
+
+            Types.Layer layer = new Types.Layer(material, thickness.Value);
+
+            DA.SetData(0, layer);
+        }
+
+        // Properties
+        public override Guid ComponentGuid
+        {
+            get
+            {
+                return new Guid("{5ea4aa2d-d271-3a9f-a777-4321bfeb3b1a}");
+            }
+        }
+        protected override System.Drawing.Bitmap Internal_Icon_24x24
+        {
+            get
+            {
+                return Properties.Resources.tortuga_edit;
+            }
+        }
+
+        public override GH_Exposure Exposure
+        {
+            get
+            {
+                return GH_Exposure.secondary;
+            }
+        }
+
+
+    }
+
+    public class StackedMaterialLayer : GH_Component
+    {
+        public StackedMaterialLayer() : base("Tortuga Stacked Material Layer", "Stacked Material Layer", "LCA Stacked Material Layer", "Tortuga", "Material") { }
+
+        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Materials", "M", "LCA Materials", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Widths", "W", "Stacked Widths", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Thickness", "T", "Overall Thickness", GH_ParamAccess.item);
+        }
+
+        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Layers", "L", "Tortuga Material Layers", GH_ParamAccess.list);
+        }
+
+        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            List<Tortuga.Types.Material> materials = new List<Types.Material>();
+            DA.GetDataList<Tortuga.Types.Material>(0, materials);
+
+            GH_Number thickness = new GH_Number(0);
+            DA.GetData<GH_Number>(2, ref thickness);
+
+            List<GH_Number> widths = new List<GH_Number>();
+            DA.GetDataList<GH_Number>(1, widths);
+
+            double overall = 0;
+            foreach (GH_Number width in widths) overall += width.Value;
+
+            List<Types.Layer> layers = new List<Types.Layer>();
+
+            if (widths.Count == materials.Count)
+            {
+
+                for (int i = 0; i < widths.Count; i++)
+                {
+                    double width = widths[i].Value;
+                    double percentage = width / overall;
+
+                    layers.Add(new Types.Layer(materials[i], thickness.Value * percentage));
+
+                }
+
+            }
+
+            DA.SetDataList(0, layers);
+        }
+
+        // Properties
+        public override Guid ComponentGuid
+        {
+            get
+            {
+                return new Guid("{5ea4aa2d-d271-3a9f-a121-4321bfeb3b1a}");
+            }
+        }
+        protected override System.Drawing.Bitmap Internal_Icon_24x24
+        {
+            get
+            {
+                return Properties.Resources.tortuga_edit;
+            }
+        }
+
+        public override GH_Exposure Exposure
+        {
+            get
+            {
+                return GH_Exposure.secondary;
+            }
+        }
+
+
+    }
+
+    public class MaterialAssembly : GH_Component
+    {
+        public MaterialAssembly() : base("Tortuga Material Assembly", "Material Assembly", "LCA Material Assembly", "Tortuga", "Material") { }
+
+        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Layer", "L", "LCA Material Layers", GH_ParamAccess.list);
+        }
+
+        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Assembly", "A", "Tortuga Material Assembly", GH_ParamAccess.item);
+        }
+
+        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            List<Tortuga.Types.Layer> layers = new List<Types.Layer>();
+            DA.GetDataList<Tortuga.Types.Layer>(0, layers);
+
+            Types.Assembly assembly = new Types.Assembly();
+            assembly.Layers = layers;
+
+            DA.SetData(0, assembly);
+        }
+
+        // Properties
+        public override Guid ComponentGuid
+        {
+            get
+            {
+                return new Guid("{5ea4aa2d-d221-3a9f-a777-4321bfeb3b1a}");
+            }
+        }
+        protected override System.Drawing.Bitmap Internal_Icon_24x24
+        {
+            get
+            {
+                return Properties.Resources.tortuga_edit;
+            }
+        }
+
+        public override GH_Exposure Exposure
+        {
+            get
+            {
+                return GH_Exposure.secondary;
+            }
+        }
+
+
+    }
+
 
     public class TortugaComponentAttributes : Grasshopper.Kernel.Attributes.GH_ComponentAttributes
     {

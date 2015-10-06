@@ -132,7 +132,7 @@ namespace Tortuga.Types
         {
             ListViewItem layerItem = new ListViewItem();
             layerItem.Margin = new Thickness(1);
-            if (Layer.contextMenu == null) Layer.BuildContextMenu();
+           // if (Layer.contextMenu == null) Layer.BuildContextMenu();
             layerItem.Background = Brushes.White;
 
 
@@ -352,17 +352,6 @@ namespace Tortuga.Types
             }
         }
 
-        public void AddLayer(ListView assemblyList, Layer layer)
-        {
-            this.Layers.Add(layer);
-            assemblyList.Items.Add(layer.Draw());
-        }
-
-        public void Draw(ListView assemblyList)
-        {
-            foreach (Layer layer in this.Layers)
-            assemblyList.Items.Add(layer.Draw());
-        }
 
 
         public static Assembly operator +(Assembly first, Assembly second)
@@ -381,7 +370,7 @@ namespace Tortuga.Types
 
             foreach (Layer layer in first.Layers)
             {
-                Layer lay = new Layer(layer.Material, layer.Width * factor, layer.isPercentual);                
+                Layer lay = new Layer(layer.Material, layer.Width * factor);                
                 assembly.Layers.Add(lay);
             }
        
@@ -401,81 +390,14 @@ namespace Tortuga.Types
         [DataMember]
         public double Width;
 
-        [DataMember]
-        public bool isPercentual;
 
-        public Layer(Material material, bool percentage)
-        { 
-            this.Width = (percentage)? 20 : 0.02;
-            this.Material = material;
-            this.isPercentual = percentage;
-        }
 
-        public Layer(Material material, double width, bool percentage) { this.Width = width; this.Material = material; this.isPercentual = percentage; }
+        public Layer(Material material, double width) { this.Width = width; this.Material = material; }
 
         private static double heightMax = 200;
         private static double heightMin = 20;
 
-        public ListViewItem Draw()
-        {
-            ListViewItem layerItem = new ListViewItem();
-            layerItem.Margin = new Thickness(1);
-            if (Layer.contextMenu == null) Layer.BuildContextMenu();
 
-            layerItem.ContextMenu = Layer.contextMenu;
-            
-
-            
-            layerItem.Tag = this;
-
-            double width = (this.isPercentual) ? this.Width : this.Width * 1000;
-            if (width < Layer.heightMin) width = Layer.heightMin;
-            else if (width > Layer.heightMax) width = Layer.heightMax;
-
-            StackPanel panel = new StackPanel()
-            {
-                Orientation = Orientation.Horizontal,
-                Height = width
-            };
-
-            layerItem.Background = new SolidColorBrush(Colors.White);
-            layerItem.BorderBrush = Brushes.White;
-            layerItem.BorderThickness = new Thickness(1);
-
-            TextBox inputWidth = new TextBox()
-            {
-                Text = this.Width.ToString(),
-                Height = 20,
-                Width = 50,
-                Tag = this
-            };
-
-            inputWidth.TextChanged += inputWidth_TextChanged;
-
-            TextBlock unitLabel = new TextBlock()
-            {
-                Text = (this.isPercentual)? "0.01%" : "m",
-                VerticalAlignment = System.Windows.VerticalAlignment.Center,
-                Margin = new Thickness(5)
-            };
-
-            TextBlock title = new TextBlock()
-            {
-                Text = String.Format("{0} ({1} kgCO2e/m3)", new string[] { this.Material.Name, this.GlobalWarmingPotential.Value.ToString() }),
-                VerticalAlignment = System.Windows.VerticalAlignment.Center,
-                Margin = new Thickness(5)
-            };
-
-            panel.Children.Add(inputWidth);
-            panel.Children.Add(unitLabel);
-            panel.Children.Add(title);
-            panel.Margin = new Thickness(2);
-
-            layerItem.Content = panel;
-
-            return layerItem;
-
-        }
 
         public UnitDouble<LCA.kgCFC11> DepletionOfOzoneLayer
         {
@@ -603,7 +525,7 @@ namespace Tortuga.Types
                 StackPanel panel = (StackPanel)textBox.Parent;
 
 
-                double factor = (this.isPercentual)? value : value * 1000;
+                double factor = value * 1000;
                 if (factor < Layer.heightMin) panel.Height = Layer.heightMin;
                 else if (factor > Layer.heightMax) panel.Height = Layer.heightMax;
                 else { panel.Height = factor; }
