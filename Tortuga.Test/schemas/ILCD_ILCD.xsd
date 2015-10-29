@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- @version-tag-schemas@ -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://lca.jrc.it/ILCD/Wrapper"
+           xmlns:ilcd="http://lca.jrc.it/ILCD/Wrapper"
+           xmlns:process="http://lca.jrc.it/ILCD/Process"
+           xmlns:lciamethod="http://lca.jrc.it/ILCD/LCIAMethod"
+           xmlns:flow="http://lca.jrc.it/ILCD/Flow"
+           xmlns:flowproperty="http://lca.jrc.it/ILCD/FlowProperty"
+           xmlns:unitgroup="http://lca.jrc.it/ILCD/UnitGroup"
+           xmlns:source="http://lca.jrc.it/ILCD/Source"
+           xmlns:contact="http://lca.jrc.it/ILCD/Contact"
+           xmlns:common="http://lca.jrc.it/ILCD/Common"
+           xmlns:edoc="http://www.iai.fzk.de/lca/edoc"
+           targetNamespace="http://lca.jrc.it/ILCD/Wrapper"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified"
+           version="1.1">
+   <xs:import namespace="http://lca.jrc.it/ILCD/Common"
+              schemaLocation="ILCD_Common_Groups.xsd"/>
+   <xs:import namespace="http://lca.jrc.it/ILCD/Process"
+              schemaLocation="ILCD_ProcessDataSet.xsd"/>
+   <xs:import namespace="http://lca.jrc.it/ILCD/Flow" schemaLocation="ILCD_FlowDataSet.xsd"/>
+   <xs:import namespace="http://lca.jrc.it/ILCD/FlowProperty"
+              schemaLocation="ILCD_FlowPropertyDataSet.xsd"/>
+   <xs:import namespace="http://lca.jrc.it/ILCD/UnitGroup"
+              schemaLocation="ILCD_UnitGroupDataSet.xsd"/>
+   <xs:import namespace="http://lca.jrc.it/ILCD/Source"
+              schemaLocation="ILCD_SourceDataSet.xsd"/>
+   <xs:import namespace="http://lca.jrc.it/ILCD/Contact"
+              schemaLocation="ILCD_ContactDataSet.xsd"/>
+   <xs:import namespace="http://lca.jrc.it/ILCD/Flow" schemaLocation="ILCD_FlowDataSet.xsd"/>
+   <xs:complexType name="ILCDType" mixed="false">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+         <xs:element ref="process:processDataSet"/>
+         <xs:element ref="flow:flowDataSet"/>
+         <xs:element ref="flowproperty:flowPropertyDataSet"/>
+         <xs:element ref="unitgroup:unitGroupDataSet"/>
+         <xs:element ref="source:sourceDataSet"/>
+         <xs:element ref="contact:contactDataSet"/>
+      </xs:choice>
+      <xs:attribute name="version" type="common:SchemaVersion" use="required"/>
+   </xs:complexType>
+   <xs:element name="ILCD" type="ILCDType">
+      <xs:unique name="DataSetUniqueConstraint">
+         <xs:selector xpath="*"/>
+         <xs:field xpath="*/*/common:UUID"/>
+      </xs:unique>
+   </xs:element>
+</xs:schema>

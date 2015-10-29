@@ -26,6 +26,7 @@ using System.Windows.Media;
 using System.Windows;
 using System.ServiceModel;
 using System.Runtime.Serialization;
+using System.Xml;
 
 namespace Tortuga.Types
 {
@@ -194,6 +195,168 @@ namespace Tortuga.Types
         }
 
         public static SortedDictionary<string, Material> LoadedMaterials = new SortedDictionary<string, Material>();
+
+        private static Tortuga.Types.Material GetMat(string matname, string id, List<Tortuga.Types.LifecycleStage> Stages)
+        {
+            System.Net.WebClient client = new System.Net.WebClient();
+            string data = client.DownloadString("http://www.oekobaudat.de/OEKOBAU.DAT/resource/processes/" + id + "?format=xml");
+
+            XmlDocument xml = new XmlDocument();
+            xml.LoadXml(data);
+
+            XmlNamespaceManager manager = new XmlNamespaceManager(xml.NameTable);
+            manager.AddNamespace("p", "http://lca.jrc.it/ILCD/Process");
+            manager.AddNamespace("epd", "http://www.iai.kit.edu/EPD/2013");
+            manager.AddNamespace("common", "http://lca.jrc.it/ILCD/Common");
+            manager.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
+            Tortuga.Types.Material mat = new Tortuga.Types.Material() { Name =matname , GUID = new Guid(id), Stages = Stages };
+            mat.GlobalWarmingPotential = new UnitDouble<LCA.CO2e>(0);
+            mat.Acidification = new UnitDouble<LCA.kgSO2>(0);
+            mat.DepletionOfNonrenewbles = new UnitDouble<LCA.MJ>(0);
+            mat.DepletionOfOzoneLayer = new UnitDouble<LCA.kgCFC11>(0);
+            mat.Eutrophication = new UnitDouble<LCA.kgPhostphate>(0);
+            mat.FormationTroposphericOzone = new UnitDouble<LCA.kgNOx>(0);
+
+
+            XmlNodeList xnList = xml.SelectNodes("//p:LCIAResults", manager);
+            foreach (XmlNode child in xnList[0].ChildNodes)
+            {
+                
+
+                if (child.ChildNodes[0].ChildNodes.Count == 1)
+                {
+                    Dictionary<string, double> values = new Dictionary<string, double>();
+
+                    string Name = child.ChildNodes[0].ChildNodes[0].InnerText;
+
+
+                    foreach (XmlNode inner in child.ChildNodes)
+                    {
+
+                        if (inner.Name == "common:other")
+                        {
+                            foreach (XmlNode vals in inner.ChildNodes)
+                            {
+                                if (vals.Name == "epd:amount")
+                                {
+                                    double tmp = 0;
+                                    if (!double.TryParse(vals.InnerText, out tmp)) { tmp = 0; }
+
+                                    if (!values.ContainsKey(vals.Attributes[0].Value))
+                                        values.Add(vals.Attributes[0].Value, tmp);
+                                    else
+                                        values[vals.Attributes[0].Value] += tmp;
+
+                                }
+                            }
+
+                        }
+
+
+
+
+                        foreach (Tortuga.Types.LifecycleStage stage in Stages)
+                        {
+
+                            double actualVal = 0;
+
+                            if (!values.ContainsKey(stage.Name))
+                            {
+                                if (stage.Name == "A1-A3")
+                                {
+                                    if (values.ContainsKey("A1")) actualVal += values["A1"];
+                                    if (values.ContainsKey("A2")) actualVal += values["A2"];
+                                    if (values.ContainsKey("A3")) actualVal += values["A3"];
+                                }
+                            }
+                            else
+                            {
+                                actualVal = values[stage.Name];
+                            }
+
+
+
+                            if (Name.Contains("(GWP)"))
+                                mat.GlobalWarmingPotential += new UnitDouble<LCA.CO2e>(actualVal);
+
+                            if (Name.Contains("(AP)"))
+                                mat.Acidification += new UnitDouble<LCA.kgSO2>(actualVal);
+
+                            if (Name.Contains("(ADPF)"))
+                                mat.DepletionOfNonrenewbles += new UnitDouble<LCA.MJ>(actualVal);
+
+                            if (Name.Contains("(OPD)"))
+                                mat.DepletionOfOzoneLayer += new UnitDouble<LCA.kgCFC11>(actualVal);
+
+                            if (Name.Contains("(ADPE)"))
+                                mat.Eutrophication += new UnitDouble<LCA.kgPhostphate>(actualVal);
+
+                            if (Name.Contains("(POCP)"))
+                                mat.FormationTroposphericOzone += new UnitDouble<LCA.kgNOx>(actualVal);
+ 
+
+                            
+                        }
+
+                    }
+
+                }
+                
+
+            }
+
+            
+
+            return mat;
+
+
+
+        }
+
+        public static void LoadFrom(List<LifecycleStage> stages)
+        {
+            if (LoadedMaterials.Count == 0)
+            {
+
+
+                System.Net.WebClient client = new System.Net.WebClient();
+                string data = client.DownloadString("http://www.oekobaudat.de/OEKOBAU.DAT/resource/processes");
+
+
+                XmlDocument xml = new XmlDocument();
+                xml.LoadXml(data);
+
+                XmlNamespaceManager manager = new XmlNamespaceManager(xml.NameTable);
+                manager.AddNamespace("p", "http://www.ilcd-network.org/ILCD/ServiceAPI/Process");
+                manager.AddNamespace("f", "http://www.ilcd-network.org/ILCD/ServiceAPI/Flow");
+                manager.AddNamespace("fp", "http://www.ilcd-network.org/ILCD/ServiceAPI/FlowProperty");
+                manager.AddNamespace("u", "http://www.ilcd-network.org/ILCD/ServiceAPI/UnitGroup");
+                manager.AddNamespace("l", "http://www.ilcd-network.org/ILCD/ServiceAPI/LCIAMethod");
+                manager.AddNamespace("s", "http://www.ilcd-network.org/ILCD/ServiceAPI/Source");
+                manager.AddNamespace("c", "http://www.ilcd-network.org/ILCD/ServiceAPI/Contact");
+                manager.AddNamespace("sapi", "http://www.ilcd-network.org/ILCD/ServiceAPI");
+
+                List<Tuple<string, string>> mats = new List<Tuple<string, string>>();
+
+
+                XmlNodeList xnList = xml.SelectNodes("//sapi:name", manager);
+                XmlNodeList xnList2 = xml.SelectNodes("//sapi:uuid", manager);
+                for (int i = 0; i < xnList.Count; i++)
+                {
+                    mats.Add(new Tuple<string, string>(xnList[i].InnerText, xnList2[i].InnerText));
+
+                    // get data from url
+                    // http://www.oekobaudat.de/OEKOBAU.DAT/resource/processes/ee4fb7c2-6119-4f00-8cb6-fc74cb66fe9a?format=xml
+
+                }
+
+
+                foreach (Tuple<string, string> tuple in mats) { LoadedMaterials.Add(tuple.Item1, GetMat(tuple.Item1, tuple.Item2, stages)); }
+            }
+        }
+    
+
 
         public static void LoadFrom(string filename, List<LifecycleStage> stages)
         {

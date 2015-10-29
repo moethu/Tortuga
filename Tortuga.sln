@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tortuga", "Tortuga\Tortuga.csproj", "{3B719374-3A56-412F-AD6E-F9BE1CA3186D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tortuga.Controls", "Tortuga.Controls\Tortuga.Controls.csproj", "{7DEDCD0F-BDCE-464A-A6F1-4EBBF9B2E304}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tortuga.Types", "Tortuga.Types\Tortuga.Types.csproj", "{54E117E7-055B-41F7-B46D-124188CC0193}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tortuga.Test", "Tortuga.Test\Tortuga.Test.csproj", "{BFC0FA6E-B6AC-4FFF-896D-A0D2D8CD5640}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{54E117E7-055B-41F7-B46D-124188CC0193}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54E117E7-055B-41F7-B46D-124188CC0193}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54E117E7-055B-41F7-B46D-124188CC0193}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFC0FA6E-B6AC-4FFF-896D-A0D2D8CD5640}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFC0FA6E-B6AC-4FFF-896D-A0D2D8CD5640}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFC0FA6E-B6AC-4FFF-896D-A0D2D8CD5640}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFC0FA6E-B6AC-4FFF-896D-A0D2D8CD5640}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

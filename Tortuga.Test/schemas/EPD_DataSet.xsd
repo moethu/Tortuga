@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @version-tag-schemas@ -->
+<!-- This product includes portions of the ILCD Format and/or the ILCD Editor, created by the European Commmission's JRC-IES, European 
+     Platform on Life Cycle Assessment together with the FZK GmbH, IAI. Copyright (C) 2009, European Commission. All Rights Reserved. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://lca.jrc.it/ILCD/Process" xmlns:common="http://lca.jrc.it/ILCD/Common"
+    xmlns:process="http://lca.jrc.it/ILCD/Process" elementFormDefault="qualified" version="1.1">
+    <xs:import namespace="http://www.iai.kit.edu/EPD/2013" schemaLocation="EPD_Extensions.xsd"/>
+    <xs:include schemaLocation="ILCD_ProcessDataSet.xsd"/>
+</xs:schema>

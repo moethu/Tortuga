@@ -30,7 +30,7 @@ using System.Xml.Serialization;
 using System.Runtime.Serialization;
 using System.IO;
 using System.Threading;
-
+using System.Xml;
 
 namespace Tortuga.GrasshopperComponents
 {
@@ -80,9 +80,10 @@ namespace Tortuga.GrasshopperComponents
             DA.GetData<GH_String>("Path", ref path);
 
 
+
             GH_Boolean productionStage = new GH_Boolean(true);
             GH_Boolean wasteProcessingStage = new GH_Boolean(true);
-            GH_Boolean recyclingPotentialStage = new GH_Boolean(true); 
+            GH_Boolean recyclingPotentialStage = new GH_Boolean(true);
 
             if (!DA.GetData<GH_Boolean>("Production", ref productionStage)) productionStage.Value = true;
             if (!DA.GetData<GH_Boolean>("Waste Processing", ref wasteProcessingStage)) wasteProcessingStage.Value = true;
@@ -90,14 +91,21 @@ namespace Tortuga.GrasshopperComponents
 
 
             Stages = new List<Types.LifecycleStage>();
-            if (productionStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "Production", Column = 0 });
-            if (wasteProcessingStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "Waste Processing", Column = 1 });
-            if (recyclingPotentialStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "Recycling Potential", Column = 2 });
+            if (productionStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "A1-A3", Column = 0 });
+            if (wasteProcessingStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "C3", Column = 1 });
+            if (recyclingPotentialStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "D", Column = 2 });
 
             this.alternativeDataSourcePath = path.Value;
 
-            Types.Material.LoadFrom(this.alternativeDataSourcePath, this.Stages);
 
+            if (this.alternativeDataSourcePath == "")
+            {
+                Types.Material.LoadFrom(this.Stages);
+            }
+            else
+            {
+                Types.Material.LoadFrom(this.alternativeDataSourcePath, this.Stages);
+            }
 
             DA.SetData("Material", this.material);
         }
@@ -194,6 +202,65 @@ namespace Tortuga.GrasshopperComponents
 
     }
 
+    public class ProfileLayer : GH_Component
+    {
+        public ProfileLayer() : base("Tortuga Profile Layer", "Profile Layer", "LCA Profile Layer", "Tortuga", "Material") { }
+
+        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Profile", "P", "LCA Profile", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Material", "M", "Material", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Distance", "D", "Distance", GH_ParamAccess.item);
+        }
+
+        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Layer", "L", "Tortuga Material Layer", GH_ParamAccess.item);
+        }
+
+        protected override void SolveInstance(IGH_DataAccess DA)
+        {
+            Tortuga.Types.Material material = null;
+            DA.GetData<Tortuga.Types.Material>(1, ref material);
+
+            Tortuga.Types.Profile profile = null;
+            DA.GetData<Tortuga.Types.Profile>(0, ref profile);
+
+            GH_Number distance = new GH_Number(0);
+            DA.GetData<GH_Number>(2, ref distance);
+
+            Types.Layer layer = new Types.Layer(material, profile.Area / distance.Value);
+
+            DA.SetData(0, layer);
+        }
+
+        // Properties
+        public override Guid ComponentGuid
+        {
+            get
+            {
+                return new Guid("{5ea4aa2d-d271-3a9f-a117-4321bfeb1b1a}");
+            }
+        }
+        protected override System.Drawing.Bitmap Internal_Icon_24x24
+        {
+            get
+            {
+                return Properties.Resources.tortuga_edit;
+            }
+        }
+
+        public override GH_Exposure Exposure
+        {
+            get
+            {
+                return GH_Exposure.secondary;
+            }
+        }
+
+
+    }
+
     public class StackedMaterialLayer : GH_Component
     {
         public StackedMaterialLayer() : base("Tortuga Stacked Material Layer", "Stacked Material Layer", "LCA Stacked Material Layer", "Tortuga", "Material") { }
@@ -239,6 +306,7 @@ namespace Tortuga.GrasshopperComponents
                 }
 
             }
+
 
             DA.SetDataList(0, layers);
         }

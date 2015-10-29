@@ -88,6 +88,16 @@ namespace Tortuga.Controls
 
 
             searchField.TextChanged += searchField_TextChanged;
+
+            this.MouseDown += MaterialEditor_MouseDown;
+        }
+
+        void MaterialEditor_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Type type = this.ParentWindow.GetType();
+            System.Reflection.MethodInfo meth = type.GetMethod("DragMove");
+
+            if (e.ChangedButton == MouseButton.Left) meth.Invoke(this.ParentWindow, null);
         }
 
 

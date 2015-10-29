@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @version-tag-schemas@ -->
+<!-- This product includes portions of the ILCD Format and/or the ILCD Editor, created by the European Commmission's JRC-IES, European 
+  Platform on Life Cycle Assessment together with the FZK GmbH, IAI. Copyright (C) 2009, European Commission. All Rights Reserved. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:epd="http://www.iai.kit.edu/EPD/2013" xmlns="http://www.iai.kit.edu/EPD/2013"
+    targetNamespace="http://www.iai.kit.edu/EPD/2013" xmlns:common="http://lca.jrc.it/ILCD/Common" xmlns:process="http://lca.jrc.it/ILCD/Process" xmlns:ilcd="http://lca.jrc.it/ILCD" elementFormDefault="qualified"
+    attributeFormDefault="qualified" version="1.1">
+    <xs:import namespace="http://lca.jrc.it/ILCD/Common" schemaLocation="ILCD_Common_Groups.xsd"/>
+
+    <xs:element name="safetyMargins">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="margins" type="common:Perc"/>
+                <xs:element name="description" type="common:FTMultiLang" minOccurs="0" maxOccurs="100"/>
+            </xs:sequence>
+        </xs:complexType>
+        <xs:unique name="descriptionLangUniqueConstraint">
+            <xs:selector xpath="epd:description"/>
+            <xs:field xpath="@xml:lang"/>
+        </xs:unique>
+    </xs:element>
+
+    <xs:simpleType name="SubTypeValues">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="generic dataset"/>
+            <xs:enumeration value="representative dataset"/>
+            <xs:enumeration value="average dataset"/>
+            <xs:enumeration value="specific dataset"/>
+            <xs:enumeration value="template dataset"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:element name="subType" type="SubTypeValues"/>
+
+    <xs:element name="referenceToUnitGroupDataSet" type="common:GlobalReferenceType">
+        <xs:unique name="referenceToUnitGroupDataSetLangUniqueConstraint">
+            <xs:selector xpath="common:shortDescription"/>
+            <xs:field xpath="@xml:lang"/>
+        </xs:unique>
+    </xs:element>
+
+    <xs:element name="isA" type="common:GlobalReferenceType">
+        <xs:unique name="isALangUniqueConstraint">
+            <xs:selector xpath="common:shortDescription"/>
+            <xs:field xpath="@xml:lang"/>
+        </xs:unique>
+    </xs:element>
+
+    <xs:element name="referenceToVendor" type="common:GlobalReferenceType">
+        <xs:unique name="referenceToVendorLangUniqueConstraint">
+            <xs:selector xpath="common:shortDescription"/>
+            <xs:field xpath="@xml:lang"/>
+        </xs:unique>
+    </xs:element>
+    
+    <xs:element name="referenceToSource" type="common:GlobalReferenceType">
+        <xs:unique name="referenceToSourceLangUniqueConstraint">
+            <xs:selector xpath="common:shortDescription"/>
+            <xs:field xpath="@xml:lang"/>
+        </xs:unique>
+    </xs:element>
+    
+    <xs:element name="vendorSpecificProduct" type="common:boolean"/>
+
+    <xs:element name="amount">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="module" type="xs:string" use="required"/>
+                    <xs:attribute name="scenario" type="xs:string" use="optional"/>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="scenarios">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="scenario" maxOccurs="unbounded" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+        <xs:unique name="scenarioID">
+            <xs:selector xpath="epd:scenario"/>
+            <xs:field xpath="@epd:name"/>
+        </xs:unique>
+    </xs:element>
+
+    <xs:element name="scenario">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="description" type="common:FTMultiLang" maxOccurs="100"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="group" type="xs:string" use="optional"/>
+            <xs:attribute name="default" type="xs:boolean" use="optional"/>
+        </xs:complexType>
+        <xs:unique name="scenarioDescriptionLangUniqueConstraint">
+            <xs:selector xpath="epd:description"/>
+            <xs:field xpath="@xml:lang"/>
+        </xs:unique>
+    </xs:element>
+
+    <xs:element name="modules">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="module" maxOccurs="unbounded" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="module">
+        <xs:complexType mixed="true">
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="productsystem-id" type="xs:string" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
