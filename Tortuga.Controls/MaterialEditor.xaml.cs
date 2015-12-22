@@ -48,10 +48,9 @@ namespace Tortuga.Controls
 
         private ListView MaterialSelector;
 
-        public string alternativeDataSourcePath;
         public System.Windows.Forms.Form ParentWindow;
 
-        private Dictionary<string, Material> Materials;
+        public Dictionary<string, Material> Materials;
      
 
 
@@ -71,7 +70,7 @@ namespace Tortuga.Controls
 
 
 
-            foreach (Material material in Material.LoadedMaterials.Values.ToList())
+            foreach (Material material in Materials.Values.ToList())
             {
                 ListViewItem lvi = material.Draw();
                 int index = MaterialSelector.Items.Add(lvi);
@@ -138,7 +137,7 @@ namespace Tortuga.Controls
         {
             MaterialSelector.Items.Clear();
 
-            foreach (Material material in Material.LoadedMaterials.Values.ToList())
+            foreach (Material material in Materials.Values.ToList())
             {
                 if (searchField.Text == "Search" || searchField.Text == "" || material.Name.ToLower().Contains(searchField.Text.ToLower()))
                     MaterialSelector.Items.Add(material.Draw());

@@ -37,13 +37,15 @@ namespace Tortuga.GrasshopperComponents
 
     public class MaterialEditor : GH_Component
     {
-        public MaterialEditor() : base("Tortuga Material Editor", "Material Editor", "LCA Material Editor", "Tortuga", "Material") { }
+        public MaterialEditor() : base("Tortuga Material", "Material", "LCA Material", "Tortuga", "Material") { }
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             List<int> optionals = new List<int>();
-
-            optionals.Add(pManager.AddTextParameter("Path", "P", "Optional: Filepath if you want to load your own CSV data", GH_ParamAccess.item));
+            
+            optionals.Add(pManager.AddBooleanParameter("Quartz", "Q", "Optional: Use Quartz Database [true]", GH_ParamAccess.item));            
+            optionals.Add(pManager.AddBooleanParameter("OekobauDat", "O", "Optional: Use OekobauDat Database [false]", GH_ParamAccess.item));
+            optionals.Add(pManager.AddTextParameter("Path", "P", "Optional: Filepath if you want to load your own CSV data [empty]", GH_ParamAccess.item));
 
             optionals.Add(pManager.AddBooleanParameter("Production", "A1-A3", "Optional: Production Stage (A1-A3) [true]", GH_ParamAccess.item));
             optionals.Add(pManager.AddBooleanParameter("Waste Processing", "C3", "Optional: Waste processing Stage (C3) [true]", GH_ParamAccess.item));
@@ -59,6 +61,7 @@ namespace Tortuga.GrasshopperComponents
 
         private Types.Material material;
         private string alternativeDataSourcePath;
+        private Dictionary<string, Types.Material> LoadedMaterials;
 
         private List<Types.LifecycleStage> Stages;
 
@@ -69,43 +72,48 @@ namespace Tortuga.GrasshopperComponents
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string serializedData = this.GetValue("material", "");
-            
+            // Get any buffered Material
+            string serializedData = this.GetValue("material", "");          
             if (serializedData != "")
-            {
                 this.material = (Types.Material)Serialization.Utilities.Deserialize(serializedData, typeof(Types.Material));
-            }
-
+            
+            // Declare Variables
             GH_String path = new GH_String("");
-            DA.GetData<GH_String>("Path", ref path);
-
-
-
             GH_Boolean productionStage = new GH_Boolean(true);
             GH_Boolean wasteProcessingStage = new GH_Boolean(true);
             GH_Boolean recyclingPotentialStage = new GH_Boolean(true);
-
-            if (!DA.GetData<GH_Boolean>("Production", ref productionStage)) productionStage.Value = true;
-            if (!DA.GetData<GH_Boolean>("Waste Processing", ref wasteProcessingStage)) wasteProcessingStage.Value = true;
-            if (!DA.GetData<GH_Boolean>("Recycling Potential", ref recyclingPotentialStage)) recyclingPotentialStage.Value = true;
-
-
+            GH_Boolean useQuartz = new GH_Boolean(true);
+            GH_Boolean useOekobaudat = new GH_Boolean(false);
             Stages = new List<Types.LifecycleStage>();
+
+            // Get Data from Ports
+            DA.GetData<GH_String>("Path", ref path);
+            this.alternativeDataSourcePath = path.Value;
+            DA.GetData<GH_Boolean>("Production", ref productionStage);
+            DA.GetData<GH_Boolean>("Waste Processing", ref wasteProcessingStage);
+            DA.GetData<GH_Boolean>("Recycling Potential", ref recyclingPotentialStage);
+            DA.GetData<GH_Boolean>("Quartz", ref useQuartz);
+            DA.GetData<GH_Boolean>("OekobauDat", ref useOekobaudat);
+
+            // Set selected Stages
             if (productionStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "A1-A3", Column = 0 });
             if (wasteProcessingStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "C3", Column = 1 });
             if (recyclingPotentialStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "D", Column = 2 });
 
-            this.alternativeDataSourcePath = path.Value;
-
-
-            if (this.alternativeDataSourcePath == "")
-            {
-                Types.Material.LoadFrom(this.Stages);
-            }
+            // if a Path has been specified load Data from File
+            if (this.alternativeDataSourcePath != "")
+                this.LoadedMaterials = Types.Material.LoadFromFile(this.alternativeDataSourcePath, this.Stages);
             else
             {
-                Types.Material.LoadFrom(this.alternativeDataSourcePath, this.Stages);
+                // Load from Quartz DB
+                if (useQuartz.Value)
+                    this.LoadedMaterials = Types.Material.LoadFromQuartz(this.Stages);
+
+                // Load from Oekobau.dat
+                else
+                    this.LoadedMaterials = Types.Material.LoadFromOekoBauDat(this.Stages);
             }
+                
 
             DA.SetData("Material", this.material);
         }
@@ -114,9 +122,11 @@ namespace Tortuga.GrasshopperComponents
         {
             Forms.MaterialEditorForm materialEditor = new Forms.MaterialEditorForm();
             Grasshopper.GUI.GH_WindowsFormUtil.CenterFormOnCursor(materialEditor, true);
-            materialEditor.materialEditor1.alternativeDataSourcePath = this.alternativeDataSourcePath;
+            
             if (this.material != null) materialEditor.materialEditor1.material = this.material;
+            materialEditor.materialEditor1.Materials = this.LoadedMaterials;
             materialEditor.ShowDialog();
+            materialEditor.materialEditor1.material.LoadData();
             this.SetValue("material", Serialization.Utilities.Serialize(materialEditor.materialEditor1.material));
             this.ExpireSolution(true);           
         }

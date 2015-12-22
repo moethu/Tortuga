@@ -101,7 +101,19 @@ namespace Tortuga.Types
         public string Name;
 
         [DataMember]
-        public Guid GUID;
+        public string Description;
+
+        [DataMember]
+        public string ID;
+
+        [DataMember]
+        public string ReferenceUnit;
+
+        [DataMember]
+        public double ReferenceValue;
+
+        [DataMember]
+        public DataSource Source;
 
         [DataMember]
         public UnitDouble<LCA.CO2e> GlobalWarmingPotential;
@@ -129,11 +141,15 @@ namespace Tortuga.Types
 
         }
 
+        public override string ToString()
+        {
+            return this.Name;
+        }
+
         public ListViewItem Draw()
         {
             ListViewItem layerItem = new ListViewItem();
             layerItem.Margin = new Thickness(1);
-           // if (Layer.contextMenu == null) Layer.BuildContextMenu();
             layerItem.Background = Brushes.White;
 
 
@@ -154,19 +170,11 @@ namespace Tortuga.Types
 
             TextBlock title = new TextBlock()
             {
-                Text = String.Format("{0} ({1} kgCO2e/m3)",new string[]{this.Name, this.GlobalWarmingPotential.Value.ToString()}),
+                Text = String.Format("{0}",new string[]{this.Name}),
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Margin = new Thickness(5)
             };
 
-
-            if (this.GlobalWarmingPotential.Value == 0)
-            {
-                Image img = new Image();
-                img.Source = Utilities.GetSourceFromBitmap(Properties.Resources.error);
-                img.Height = 16; img.Width = 16;
-                panel.Children.Add(img);
-            }
 
             panel.Children.Add(title);
 
@@ -194,131 +202,11 @@ namespace Tortuga.Types
             this.Stages = source.Stages;
         }
 
-        public static SortedDictionary<string, Material> LoadedMaterials = new SortedDictionary<string, Material>();
 
-        private static Tortuga.Types.Material GetMat(string matname, string id, List<Tortuga.Types.LifecycleStage> Stages)
+        public static Dictionary<string, Types.Material> LoadFromOekoBauDat(List<LifecycleStage> stages)
         {
-            System.Net.WebClient client = new System.Net.WebClient();
-            string data = client.DownloadString("http://www.oekobaudat.de/OEKOBAU.DAT/resource/processes/" + id + "?format=xml");
-
-            XmlDocument xml = new XmlDocument();
-            xml.LoadXml(data);
-
-            XmlNamespaceManager manager = new XmlNamespaceManager(xml.NameTable);
-            manager.AddNamespace("p", "http://lca.jrc.it/ILCD/Process");
-            manager.AddNamespace("epd", "http://www.iai.kit.edu/EPD/2013");
-            manager.AddNamespace("common", "http://lca.jrc.it/ILCD/Common");
-            manager.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-
-            Tortuga.Types.Material mat = new Tortuga.Types.Material() { Name =matname , GUID = new Guid(id), Stages = Stages };
-            mat.GlobalWarmingPotential = new UnitDouble<LCA.CO2e>(0);
-            mat.Acidification = new UnitDouble<LCA.kgSO2>(0);
-            mat.DepletionOfNonrenewbles = new UnitDouble<LCA.MJ>(0);
-            mat.DepletionOfOzoneLayer = new UnitDouble<LCA.kgCFC11>(0);
-            mat.Eutrophication = new UnitDouble<LCA.kgPhostphate>(0);
-            mat.FormationTroposphericOzone = new UnitDouble<LCA.kgNOx>(0);
-
-
-            XmlNodeList xnList = xml.SelectNodes("//p:LCIAResults", manager);
-            foreach (XmlNode child in xnList[0].ChildNodes)
-            {
-                
-
-                if (child.ChildNodes[0].ChildNodes.Count == 1)
-                {
-                    Dictionary<string, double> values = new Dictionary<string, double>();
-
-                    string Name = child.ChildNodes[0].ChildNodes[0].InnerText;
-
-
-                    foreach (XmlNode inner in child.ChildNodes)
-                    {
-
-                        if (inner.Name == "common:other")
-                        {
-                            foreach (XmlNode vals in inner.ChildNodes)
-                            {
-                                if (vals.Name == "epd:amount")
-                                {
-                                    double tmp = 0;
-                                    if (!double.TryParse(vals.InnerText, out tmp)) { tmp = 0; }
-
-                                    if (!values.ContainsKey(vals.Attributes[0].Value))
-                                        values.Add(vals.Attributes[0].Value, tmp);
-                                    else
-                                        values[vals.Attributes[0].Value] += tmp;
-
-                                }
-                            }
-
-                        }
-
-
-
-
-                        foreach (Tortuga.Types.LifecycleStage stage in Stages)
-                        {
-
-                            double actualVal = 0;
-
-                            if (!values.ContainsKey(stage.Name))
-                            {
-                                if (stage.Name == "A1-A3")
-                                {
-                                    if (values.ContainsKey("A1")) actualVal += values["A1"];
-                                    if (values.ContainsKey("A2")) actualVal += values["A2"];
-                                    if (values.ContainsKey("A3")) actualVal += values["A3"];
-                                }
-                            }
-                            else
-                            {
-                                actualVal = values[stage.Name];
-                            }
-
-
-
-                            if (Name.Contains("(GWP)"))
-                                mat.GlobalWarmingPotential += new UnitDouble<LCA.CO2e>(actualVal);
-
-                            if (Name.Contains("(AP)"))
-                                mat.Acidification += new UnitDouble<LCA.kgSO2>(actualVal);
-
-                            if (Name.Contains("(ADPF)"))
-                                mat.DepletionOfNonrenewbles += new UnitDouble<LCA.MJ>(actualVal);
-
-                            if (Name.Contains("(OPD)"))
-                                mat.DepletionOfOzoneLayer += new UnitDouble<LCA.kgCFC11>(actualVal);
-
-                            if (Name.Contains("(ADPE)"))
-                                mat.Eutrophication += new UnitDouble<LCA.kgPhostphate>(actualVal);
-
-                            if (Name.Contains("(POCP)"))
-                                mat.FormationTroposphericOzone += new UnitDouble<LCA.kgNOx>(actualVal);
- 
-
-                            
-                        }
-
-                    }
-
-                }
-                
-
-            }
-
-            
-
-            return mat;
-
-
-
-        }
-
-        public static void LoadFrom(List<LifecycleStage> stages)
-        {
-            if (LoadedMaterials.Count == 0)
-            {
-
+            Dictionary<string, Types.Material> LoadedMaterials = new Dictionary<string, Material>();
+                LoadedMaterials.Clear();
 
                 System.Net.WebClient client = new System.Net.WebClient();
                 string data = client.DownloadString("http://www.oekobaudat.de/OEKOBAU.DAT/resource/processes");
@@ -344,26 +232,55 @@ namespace Tortuga.Types
                 XmlNodeList xnList2 = xml.SelectNodes("//sapi:uuid", manager);
                 for (int i = 0; i < xnList.Count; i++)
                 {
-                    mats.Add(new Tuple<string, string>(xnList[i].InnerText, xnList2[i].InnerText));
+                    Material material = new Material()
+                    {
+                        Name = xnList[i].InnerText,
+                        ID = xnList2[i].InnerText,
+                        Source = DataSource.Oekobaudat,
+                        Stages = stages,
+                        Description = ""
+                    };
 
-                    // get data from url
-                    // http://www.oekobaudat.de/OEKOBAU.DAT/resource/processes/ee4fb7c2-6119-4f00-8cb6-fc74cb66fe9a?format=xml
-
+                    LoadedMaterials.Add(material.Name, material);
                 }
 
-
-                foreach (Tuple<string, string> tuple in mats) { LoadedMaterials.Add(tuple.Item1, GetMat(tuple.Item1, tuple.Item2, stages)); }
-            }
+                return LoadedMaterials;
         }
-    
 
-
-        public static void LoadFrom(string filename, List<LifecycleStage> stages)
+        public static Dictionary<string, Types.Material> LoadFromQuartz(List<LifecycleStage> stages)
         {
+
+            Dictionary<string, Types.Material> LoadedMaterials = new Dictionary<string, Material>();
+
+
+            Tortuga.Quartz.Query allmaterials = new Quartz.Query("*");
+
+            for (int i = 0; i < allmaterials.result.hits.Count; i++)
+            {
+                Tortuga.Quartz.Hit hit = allmaterials.result.hits[i];
+                Material material = new Material()
+                {
+                    Name = hit.document.name + " (" + hit.document.id + ")",
+                    ID = hit.document.id + "-" + hit.document.version,
+                    Source = DataSource.Quartz,
+                    Stages = stages,
+                    Description = hit.document.description
+                };
+
+                LoadedMaterials.Add(material.Name, material);
+            }
+
+            return LoadedMaterials;
+        }
+
+        public static Dictionary<string, Types.Material> LoadFromFile(string filename, List<LifecycleStage> stages)
+        {
+            Dictionary<string, Types.Material> LoadedMaterials = new Dictionary<string, Material>();
+
             if (System.IO.File.Exists(filename))
             {
 
-                LoadedMaterials.Clear();
+                
 
                 string[] data = System.IO.File.ReadAllLines(filename);
 
@@ -394,7 +311,9 @@ namespace Tortuga.Types
                         Tortuga.Types.Material material = new Material()
                         {
                             Name = fields[0],
-
+                            Description = "",
+                            Stages = stages,
+                            Source = DataSource.File,
                             GlobalWarmingPotential = GWP,
                             Acidification = Acidification,
                             DepletionOfNonrenewbles = DepletionOfNonrenewbles,
@@ -403,37 +322,150 @@ namespace Tortuga.Types
                             FormationTroposphericOzone = FormationTroposphericOzone,
                         };
 
-                        material.Stages = stages;
-
                         LoadedMaterials.Add(material.Name, material);
                     }
                 }
 
             }
+
+            return LoadedMaterials;
+        }
+
+        public void LoadData()
+        {
+            switch (this.Source)
+            {
+                case DataSource.Oekobaudat:
+                    System.Net.WebClient client = new System.Net.WebClient();
+                    string data = client.DownloadString("http://www.oekobaudat.de/OEKOBAU.DAT/resource/processes/" + this.ID + "?format=xml");
+
+                    XmlDocument xml = new XmlDocument();
+                    xml.LoadXml(data);
+
+                    XmlNamespaceManager manager = new XmlNamespaceManager(xml.NameTable);
+                    manager.AddNamespace("p", "http://lca.jrc.it/ILCD/Process");
+                    manager.AddNamespace("epd", "http://www.iai.kit.edu/EPD/2013");
+                    manager.AddNamespace("common", "http://lca.jrc.it/ILCD/Common");
+                    manager.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
+                    this.GlobalWarmingPotential = new UnitDouble<LCA.CO2e>(0);
+                    this.Acidification = new UnitDouble<LCA.kgSO2>(0);
+                    this.DepletionOfNonrenewbles = new UnitDouble<LCA.MJ>(0);
+                    this.DepletionOfOzoneLayer = new UnitDouble<LCA.kgCFC11>(0);
+                    this.Eutrophication = new UnitDouble<LCA.kgPhostphate>(0);
+                    this.FormationTroposphericOzone = new UnitDouble<LCA.kgNOx>(0);
+
+                    XmlNodeList xnList = xml.SelectNodes("//p:LCIAResults", manager);
+                    foreach (XmlNode child in xnList[0].ChildNodes)
+                    {
+
+                        if (child.ChildNodes[0].ChildNodes.Count == 1)
+                        {
+                            Dictionary<string, double> values = new Dictionary<string, double>();
+
+                            string Name = child.ChildNodes[0].ChildNodes[0].InnerText;
+
+
+                            foreach (XmlNode inner in child.ChildNodes)
+                            {
+
+                                if (inner.Name == "common:other")
+                                {
+                                    foreach (XmlNode vals in inner.ChildNodes)
+                                    {
+                                        if (vals.Name == "epd:amount")
+                                        {
+                                            double tmp = 0;
+                                            if (!double.TryParse(vals.InnerText, out tmp)) { tmp = 0; }
+
+                                            if (!values.ContainsKey(vals.Attributes[0].Value))
+                                                values.Add(vals.Attributes[0].Value, tmp);
+                                            else
+                                                values[vals.Attributes[0].Value] += tmp;
+                                        }
+                                    }
+                                }
+
+
+                                foreach (Tortuga.Types.LifecycleStage stage in this.Stages)
+                                {
+                                    double actualVal = 0;
+                                    if (!values.ContainsKey(stage.Name))
+                                    {
+                                        if (stage.Name == "A1-A3")
+                                        {
+                                            if (values.ContainsKey("A1")) actualVal += values["A1"];
+                                            if (values.ContainsKey("A2")) actualVal += values["A2"];
+                                            if (values.ContainsKey("A3")) actualVal += values["A3"];
+                                        }
+                                    }
+                                    else
+                                    {
+                                        actualVal = values[stage.Name];
+                                    }
+
+                                    if (Name.Contains("(GWP)"))
+                                        this.GlobalWarmingPotential += new UnitDouble<LCA.CO2e>(actualVal);
+
+                                    if (Name.Contains("(AP)"))
+                                        this.Acidification += new UnitDouble<LCA.kgSO2>(actualVal);
+
+                                    if (Name.Contains("(ADPF)"))
+                                        this.DepletionOfNonrenewbles += new UnitDouble<LCA.MJ>(actualVal);
+
+                                    if (Name.Contains("(OPD)"))
+                                        this.DepletionOfOzoneLayer += new UnitDouble<LCA.kgCFC11>(actualVal);
+
+                                    if (Name.Contains("(ADPE)"))
+                                        this.Eutrophication += new UnitDouble<LCA.kgPhostphate>(actualVal);
+
+                                    if (Name.Contains("(POCP)"))
+                                        this.FormationTroposphericOzone += new UnitDouble<LCA.kgNOx>(actualVal);
+                                }
+                            }
+                        }
+                    }
+
+                    break;
+
+                case DataSource.Quartz:
+
+                    this.GlobalWarmingPotential = new UnitDouble<LCA.CO2e>(0);
+                    this.Acidification = new UnitDouble<LCA.kgSO2>(0);
+                    this.DepletionOfNonrenewbles = new UnitDouble<LCA.MJ>(0);
+                    this.DepletionOfOzoneLayer = new UnitDouble<LCA.kgCFC11>(0);
+                    this.Eutrophication = new UnitDouble<LCA.kgPhostphate>(0);
+                    this.FormationTroposphericOzone = new UnitDouble<LCA.kgNOx>(0);
+
+                    Quartz.Data qdata = Tortuga.Quartz.Document.LoadRootObject(this.ID);
+
+                    foreach (LifecycleStage stage in this.Stages)
+                    {
+                        List<Quartz.LcaData> res = null;
+                        if (stage.Name == "A1-A3") res = qdata.environmental.lcaResults.inUse;
+                        if (stage.Name == "C3") res = qdata.environmental.lcaResults.cradleToGate;
+                        if (stage.Name == "D") res = qdata.environmental.lcaResults.endOfLife;
+                        if (res != null)
+                        {
+                            if (res[2].value != null) this.GlobalWarmingPotential += new UnitDouble<Types.LCA.CO2e>(double.Parse(res[2].value));
+                            if (res[0].value != null) this.Acidification += new UnitDouble<Types.LCA.kgSO2>(double.Parse(res[0].value));
+                            if (res[5].value != null) this.DepletionOfNonrenewbles += new UnitDouble<Types.LCA.MJ>(double.Parse(res[5].value));
+                            if (res[3].value != null) this.DepletionOfOzoneLayer += new UnitDouble<Types.LCA.kgCFC11>(double.Parse(res[3].value));
+                            if (res[1].value != null) this.Eutrophication += new UnitDouble<Types.LCA.kgPhostphate>(double.Parse(res[1].value));
+                            if (res[4].value != null) this.FormationTroposphericOzone += new UnitDouble<Types.LCA.kgNOx>(double.Parse(res[4].value));
+                        }
+                    }
+
+                    break;
+            }
         }
     }
 
-    [DataContract]
-    [XmlSerializerFormat]
-    [KnownType(typeof(Layer))]
-    [KnownType(typeof(Material))]
-    [KnownType(typeof(LifecycleStage))]
-    [KnownType(typeof(UnitDouble<LCA.CO2e>))]
-    [KnownType(typeof(LCA.CO2e))]
-    [KnownType(typeof(UnitDouble<LCA.kgCFC11>))]
-    [KnownType(typeof(LCA.kgCFC11))]
-    [KnownType(typeof(UnitDouble<LCA.kgSO2>))]
-    [KnownType(typeof(LCA.kgSO2))]
-    [KnownType(typeof(UnitDouble<LCA.kgPhostphate>))]
-    [KnownType(typeof(LCA.kgPhostphate))]
-    [KnownType(typeof(UnitDouble<LCA.kgNOx>))]
-    [KnownType(typeof(LCA.kgNOx))]
-    [KnownType(typeof(UnitDouble<LCA.MJ>))]
-    [KnownType(typeof(LCA.MJ))]
-    [KnownType(typeof(LCA))]
+
+
+
     public class Assembly
     {
-        [DataMember]
         public List<Layer> Layers;
 
         public override string ToString()
@@ -543,24 +575,28 @@ namespace Tortuga.Types
 
     }
 
-    [DataContract]
-    [XmlSerializerFormat]
+
+    /// <summary>
+    /// Material Layer
+    /// </summary>
     public class Layer
     {
-        [DataMember]
+        /// <summary>
+        /// Material
+        /// </summary>
         public Material Material;
 
-        [DataMember]
+        /// <summary>
+        /// Layer Width
+        /// </summary>
         public double Width;
-
-
-
+        
         public Layer(Material material, double width) { this.Width = width; this.Material = material; }
 
-        private static double heightMax = 200;
-        private static double heightMin = 20;
-
-
+        public override string ToString()
+        {
+            return String.Format("{0} (Width: {1})", new object[] { Material.Name, this.Width.ToString() });
+        }
 
         public UnitDouble<LCA.kgCFC11> DepletionOfOzoneLayer
         {
@@ -609,99 +645,15 @@ namespace Tortuga.Types
                 return new UnitDouble<LCA.CO2e>(this.Material.GlobalWarmingPotential.Value * this.Width);
             }
         }
-
-        public static ContextMenu contextMenu;
-
-        public static void BuildContextMenu()
-        {
-            contextMenu = new ContextMenu();
-            MenuItem moveUp = new MenuItem() { Header = "move up", Icon = new Image() { Source = Utilities.GetSourceFromBitmap(Properties.Resources.bullet_arrow_up)} }; moveUp.Click += move_Click;
-            MenuItem moveDown = new MenuItem() { Header = "move down", Icon = new Image() { Source = Utilities.GetSourceFromBitmap(Properties.Resources.bullet_arrow_down) } }; moveDown.Click += move_Click;
-            MenuItem moveTop = new MenuItem() { Header = "move top", Icon = new Image() { Source = Utilities.GetSourceFromBitmap(Properties.Resources.bullet_arrow_top) } }; moveTop.Click += move_Click;
-            MenuItem moveBottom = new MenuItem() { Header = "move bottom", Icon = new Image() { Source = Utilities.GetSourceFromBitmap(Properties.Resources.bullet_arrow_bottom) } }; moveBottom.Click += move_Click;
-
-
-            contextMenu.Items.Add(moveUp);
-            contextMenu.Items.Add(moveDown);
-            contextMenu.Items.Add(moveTop);
-            contextMenu.Items.Add(moveBottom);
-
-        
-        }
-
-
-        static void move_Click(object sender, RoutedEventArgs e)
-        {
-            MenuItem mnu = (MenuItem)sender;
-            ContextMenu m = (ContextMenu)mnu.Parent;
-            ListViewItem item = (ListViewItem)m.PlacementTarget;
-            ListView lv = (ListView)item.Parent;
-            int index = lv.SelectedIndex;
-
-            switch (mnu.Header.ToString())
-            {
-                case "move up":                   
-                    if (index > 0)
-                    {
-                        lv.Items.RemoveAt(index);
-                        lv.Items.Insert(index - 1, item);
-                    }
-                    break;
-
-                case "move down":
-                    if (index < lv.Items.Count - 1)
-                    {
-                        lv.Items.RemoveAt(index);
-                        lv.Items.Insert(index + 1, item);
-                    }
-                    break;
-
-                case "move top":
-                    lv.Items.RemoveAt(lv.SelectedIndex);
-                    lv.Items.Insert(0, item);
-                    break;
-
-                case "move bottom":
-                    lv.Items.RemoveAt(lv.SelectedIndex);
-                    lv.Items.Add(item);
-                    break;
-
-                default: break;
-            }
-            
-
-            
-        }
-
-        void inputWidth_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-            TextBox textBox = (TextBox)sender;
-
-            double value = Layer.heightMin;
-
-            if (double.TryParse(textBox.Text, out value))
-            {
-                Layer layer = (Layer)textBox.Tag;
-                layer.Width = value;
-
-                StackPanel panel = (StackPanel)textBox.Parent;
-
-
-                double factor = value * 1000;
-                if (factor < Layer.heightMin) panel.Height = Layer.heightMin;
-                else if (factor > Layer.heightMax) panel.Height = Layer.heightMax;
-                else { panel.Height = factor; }
-
-                
-
-
-
-            }
-        }
-
     }
 
+
+    public enum DataSource
+    { 
+        File,
+        Oekobaudat,
+        Quartz
+    }
 
 }
 
