@@ -42,7 +42,9 @@ namespace Tortuga.GrasshopperComponents
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             List<int> optionals = new List<int>();
+
             
+
             optionals.Add(pManager.AddBooleanParameter("Quartz", "Q", "Optional: Use Quartz Database [true]", GH_ParamAccess.item));            
             optionals.Add(pManager.AddBooleanParameter("OekobauDat", "O", "Optional: Use OekobauDat Database [false]", GH_ParamAccess.item));
             optionals.Add(pManager.AddTextParameter("Path", "P", "Optional: Filepath if you want to load your own CSV data [empty]", GH_ParamAccess.item));
@@ -50,7 +52,7 @@ namespace Tortuga.GrasshopperComponents
             optionals.Add(pManager.AddBooleanParameter("Production", "A1-A3", "Optional: Production Stage (A1-A3) [true]", GH_ParamAccess.item));
             optionals.Add(pManager.AddBooleanParameter("Waste Processing", "C3", "Optional: Waste processing Stage (C3) [true]", GH_ParamAccess.item));
             optionals.Add(pManager.AddBooleanParameter("Recycling Potential", "D", "Optional: Recycling Potential Stage (D) [true]", GH_ParamAccess.item));
-
+            optionals.Add(pManager.AddTextParameter("URL", "URL", "URL pointing to resource, usually either http://www.quartzproject.org for Quartz or http://www.oekobaudat.de/OEKOBAU.DAT", GH_ParamAccess.item));
             foreach (int i in optionals) pManager[i].Optional = true;
         }
 
@@ -62,7 +64,7 @@ namespace Tortuga.GrasshopperComponents
         private Types.Material material;
         private string alternativeDataSourcePath;
         private Dictionary<string, Types.Material> LoadedMaterials;
-
+        private string Url;
         private List<Types.LifecycleStage> Stages;
 
         public override void CreateAttributes()
@@ -86,6 +88,12 @@ namespace Tortuga.GrasshopperComponents
             GH_Boolean useOekobaudat = new GH_Boolean(false);
             Stages = new List<Types.LifecycleStage>();
 
+            GH_String url = new GH_String("");
+            if (!DA.GetData<GH_String>("URL", ref url))
+                this.Url = "";
+            else
+                this.Url = url.Value;
+
             // Get Data from Ports
             DA.GetData<GH_String>("Path", ref path);
             this.alternativeDataSourcePath = path.Value;
@@ -94,6 +102,14 @@ namespace Tortuga.GrasshopperComponents
             DA.GetData<GH_Boolean>("Recycling Potential", ref recyclingPotentialStage);
             DA.GetData<GH_Boolean>("Quartz", ref useQuartz);
             DA.GetData<GH_Boolean>("OekobauDat", ref useOekobaudat);
+
+            if (this.Url == "")
+            {
+                if (useOekobaudat.Value)
+                    this.Url = "http://www.oekobaudat.de/OEKOBAU.DAT";
+                if (useQuartz.Value)
+                    this.Url = "http://www.quartzproject.org";
+            }
 
             // Set selected Stages
             if (productionStage.Value) Stages.Add(new Types.LifecycleStage() { Name = "A1-A3", Column = 0 });
@@ -107,17 +123,17 @@ namespace Tortuga.GrasshopperComponents
             {
                 // Load from Quartz DB
                 if (useQuartz.Value)
-                    this.LoadedMaterials = Types.Material.LoadFromQuartz(this.Stages);
+                    this.LoadedMaterials = Types.Material.LoadFromQuartz(this.Stages,this.Url);
 
                 // Load from Oekobau.dat
                 else
-                    this.LoadedMaterials = Types.Material.LoadFromOekoBauDat(this.Stages);
+                    this.LoadedMaterials = Types.Material.LoadFromOekoBauDat(this.Stages, this.Url);
             }
                 
 
             DA.SetData("Material", this.material);
         }
-
+        
         public void ShowEditor()
         {
             Forms.MaterialEditorForm materialEditor = new Forms.MaterialEditorForm();
@@ -126,7 +142,7 @@ namespace Tortuga.GrasshopperComponents
             if (this.material != null) materialEditor.materialEditor1.material = this.material;
             materialEditor.materialEditor1.Materials = this.LoadedMaterials;
             materialEditor.ShowDialog();
-            materialEditor.materialEditor1.material.LoadData();
+            materialEditor.materialEditor1.material.LoadData(this.Url);
             this.SetValue("material", Serialization.Utilities.Serialize(materialEditor.materialEditor1.material));
             this.ExpireSolution(true);           
         }

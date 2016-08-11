@@ -16,10 +16,10 @@ namespace Tortuga.Quartz
     {
         public Result result;
 
-        public Query(string searchstring)
+        public Query(string searchstring, string url = "http://www.quartzproject.org")
         { 
             System.Net.WebClient client = new System.Net.WebClient();
-            string data = client.DownloadString("http://www.quartzproject.org/query?query=" + searchstring);
+            string data = client.DownloadString(url+"/query?query=" + searchstring);
 
             this.result = Newtonsoft.Json.JsonConvert.DeserializeObject<Result>(data);
         }

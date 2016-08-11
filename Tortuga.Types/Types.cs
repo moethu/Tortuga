@@ -203,13 +203,13 @@ namespace Tortuga.Types
         }
 
 
-        public static Dictionary<string, Types.Material> LoadFromOekoBauDat(List<LifecycleStage> stages)
+        public static Dictionary<string, Types.Material> LoadFromOekoBauDat(List<LifecycleStage> stages, string url)
         {
             Dictionary<string, Types.Material> LoadedMaterials = new Dictionary<string, Material>();
                 LoadedMaterials.Clear();
 
                 System.Net.WebClient client = new System.Net.WebClient();
-                string data = client.DownloadString("http://www.oekobaudat.de/OEKOBAU.DAT/resource/processes");
+                string data = client.DownloadString(url + "/resource/processes");
 
 
                 XmlDocument xml = new XmlDocument();
@@ -247,13 +247,13 @@ namespace Tortuga.Types
                 return LoadedMaterials;
         }
 
-        public static Dictionary<string, Types.Material> LoadFromQuartz(List<LifecycleStage> stages)
+        public static Dictionary<string, Types.Material> LoadFromQuartz(List<LifecycleStage> stages, string url)
         {
 
             Dictionary<string, Types.Material> LoadedMaterials = new Dictionary<string, Material>();
 
 
-            Tortuga.Quartz.Query allmaterials = new Quartz.Query("*");
+            Tortuga.Quartz.Query allmaterials = new Quartz.Query("*", url);
 
             for (int i = 0; i < allmaterials.result.hits.Count; i++)
             {
@@ -331,13 +331,13 @@ namespace Tortuga.Types
             return LoadedMaterials;
         }
 
-        public void LoadData()
+        public void LoadData(string url)
         {
             switch (this.Source)
             {
                 case DataSource.Oekobaudat:
                     System.Net.WebClient client = new System.Net.WebClient();
-                    string data = client.DownloadString("http://www.oekobaudat.de/OEKOBAU.DAT/resource/processes/" + this.ID + "?format=xml");
+                    string data = client.DownloadString(url + "/resource/processes/" + this.ID + "?format=xml");
 
                     XmlDocument xml = new XmlDocument();
                     xml.LoadXml(data);
