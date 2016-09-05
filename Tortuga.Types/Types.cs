@@ -203,7 +203,7 @@ namespace Tortuga.Types
         }
 
 
-        public static Dictionary<string, Types.Material> LoadFromOekoBauDat(List<LifecycleStage> stages, string url)
+        public static Dictionary<string, Types.Material> LoadFromOekoBauDat(List<LifecycleStage> stages, string url, string lang)
         {
             Dictionary<string, Types.Material> LoadedMaterials = new Dictionary<string, Material>();
                 LoadedMaterials.Clear();
@@ -230,18 +230,30 @@ namespace Tortuga.Types
 
                 XmlNodeList xnList = xml.SelectNodes("//sapi:name", manager);
                 XmlNodeList xnList2 = xml.SelectNodes("//sapi:uuid", manager);
-                for (int i = 0; i < xnList.Count; i++)
+                for (int i = 0; i < xnList.Count && i < xnList2.Count; i++)
                 {
-                    Material material = new Material()
+                    
+                    var langAttribute = xnList[i].Attributes["xml:lang"];
+                    if (langAttribute == null)
+                        langAttribute = xnList[i].Attributes["lang"];
+                    if (langAttribute != null)
                     {
-                        Name = xnList[i].InnerText,
-                        ID = xnList2[i].InnerText,
-                        Source = DataSource.Oekobaudat,
-                        Stages = stages,
-                        Description = ""
-                    };
+                        if (langAttribute.Value.ToLower() == lang.ToLower())
+                        {
 
-                    LoadedMaterials.Add(material.Name, material);
+                            Material material = new Material()
+                            {
+                                Name = xnList[i].InnerText,
+                                ID = xnList2[i].InnerText,
+                                Source = DataSource.Oekobaudat,
+                                Stages = stages,
+                                Description = ""
+                            };
+
+
+                            LoadedMaterials.Add(material.Name, material);
+                        }
+                    }
                 }
 
                 return LoadedMaterials;

@@ -51,7 +51,8 @@ namespace Tortuga.Quartz
 
         public static Data LoadRootObject(string id)
         {
-            string url = String.Format("http://www.quartzproject.org/products/{0}.json", new object[] { id });
+            string version = id.Substring(id.Length - 3, 1);
+            string url = String.Format("http://www.quartzproject.org/products/{1}/{0}.json", new object[] { id, version });
             System.Net.WebClient client = new System.Net.WebClient();
             string data = client.DownloadString(url);
             return Newtonsoft.Json.JsonConvert.DeserializeObject<Data>(data);

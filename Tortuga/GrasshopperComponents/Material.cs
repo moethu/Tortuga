@@ -53,6 +53,7 @@ namespace Tortuga.GrasshopperComponents
             optionals.Add(pManager.AddBooleanParameter("Waste Processing", "C3", "Optional: Waste processing Stage (C3) [true]", GH_ParamAccess.item));
             optionals.Add(pManager.AddBooleanParameter("Recycling Potential", "D", "Optional: Recycling Potential Stage (D) [true]", GH_ParamAccess.item));
             optionals.Add(pManager.AddTextParameter("URL", "URL", "URL pointing to resource, usually either http://www.quartzproject.org for Quartz or http://www.oekobaudat.de/OEKOBAU.DAT", GH_ParamAccess.item));
+            optionals.Add(pManager.AddTextParameter("Lang", "l", "Language for Oekobaudat ('de' or 'en')", GH_ParamAccess.item));
             foreach (int i in optionals) pManager[i].Optional = true;
         }
 
@@ -103,6 +104,9 @@ namespace Tortuga.GrasshopperComponents
             DA.GetData<GH_Boolean>("Quartz", ref useQuartz);
             DA.GetData<GH_Boolean>("OekobauDat", ref useOekobaudat);
 
+            GH_String lang = new GH_String("de");
+            DA.GetData<GH_String>("Lang", ref lang);
+
             if (this.Url == "")
             {
                 if (useOekobaudat.Value)
@@ -127,7 +131,7 @@ namespace Tortuga.GrasshopperComponents
 
                 // Load from Oekobau.dat
                 else
-                    this.LoadedMaterials = Types.Material.LoadFromOekoBauDat(this.Stages, this.Url);
+                    this.LoadedMaterials = Types.Material.LoadFromOekoBauDat(this.Stages, this.Url, lang.Value.ToLower());
             }
                 
 
